@@ -16,9 +16,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-var brps_options;
-
-
 google.load('jquery', '1.3');
 google.setOnLoadCallback(function() {
   BRPS_get();
@@ -35,12 +32,12 @@ function BRPS_render_widget_title() {
 function BRPS_get() {
   var $ = jQuery;
   // Get Blog ID
-  link = $($('link[rel=EditURI]')[0]).attr('href')
-  var blog_id = ''
-  blog_id = /.*blogID=(\d+)/.exec(link)[1]
+  var link = $($("link[rel='EditURI']")[0]).attr('href');
+  var blog_id = '';
+  var blog_id = /.*blogID=(\d+)/.exec(link)[1];
   // Get Post ID
-  links = $('link[rel=alternate]')
-  var post_id = ''
+  var links = $("link[rel='alternate']");
+  var post_id = '';
   for (var i=0; i < links.length; i++) {
     m = /.*\/feeds\/(\d+)\/comments\/default/.exec($(links[i]).attr('href'))
     if (m != null)
@@ -50,7 +47,7 @@ function BRPS_get() {
         }
     }
   if (blog_id != '' && post_id != '') {
-    $('#related_posts').empty()
+    $('#related_posts').empty();
     BRPS_render_widget_title();
     $('<i>Loading...</i>').appendTo('#related_posts');
     max_results = (brps_options && brps_options.max_results)
@@ -59,7 +56,7 @@ function BRPS_get() {
     $.getJSON("http://brps.appspot.com/get?blog=" + blog_id + "&post=" + post_id + max_results + "&callback=?",
         function(data){
 	    	  var $ = jQuery;
-          $('#related_posts').empty()
+          $('#related_posts').empty();
           BRPS_render_widget_title();
           if (data.error) {
             $('<p>' + data.error + '</p>').appendTo('#related_posts');
