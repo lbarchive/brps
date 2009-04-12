@@ -23,14 +23,16 @@ google.setOnLoadCallback(function() {
 
 function BRPS_render_widget_title() {
   var $ = jQuery;
-  if (brps_options && brps_options.title)
-    $(brps_options.title).appendTo('#related_posts');
+  var _brps_options = window.brps_options;
+  if (_brps_options && _brps_options.title)
+    $(_brps_options.title).appendTo('#related_posts');
   else
     $('<h2>Related Posts</h2>').appendTo('#related_posts');
   }
 
 function BRPS_get() {
   var $ = jQuery;
+  var _brps_options = window.brps_options;
   // Get Blog ID
   var link = $($("link[rel='EditURI']")[0]).attr('href');
   var blog_id = '';
@@ -50,12 +52,13 @@ function BRPS_get() {
     $('#related_posts').empty();
     BRPS_render_widget_title();
     $('<i>Loading...</i>').appendTo('#related_posts');
-    max_results = (brps_options && brps_options.max_results)
-        ? '&max_results=' + brps_options.max_results.toString()
+    max_results = (_brps_options && _brps_options.max_results)
+        ? '&max_results=' + _brps_options.max_results.toString()
         : '';
     $.getJSON("http://brps.appspot.com/get?blog=" + blog_id + "&post=" + post_id + max_results + "&callback=?",
         function(data){
 	    	  var $ = jQuery;
+          var _brps_options = window.brps_options;
           $('#related_posts').empty();
           BRPS_render_widget_title();
           if (data.error) {
@@ -66,7 +69,7 @@ function BRPS_get() {
     		  	}
 		      else {
             if (data.entry.length > 0) {
-              src = (brps_options && brps_options.append_src) ? '?src=brps' : '';
+              src = (_brps_options && _brps_options.append_src) ? '?src=brps' : '';
               $('<ul></ul>').appendTo('#related_posts');
               $.each(data.entry, function(i, entry){
                 $('<li><a hr' + 'ef="' + entry.link + src + '" title="Score: ' + entry.score.toString() + '">' + entry.title + '</a></li>').appendTo('#related_posts ul');
