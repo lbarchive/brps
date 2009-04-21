@@ -127,7 +127,10 @@ def get_labels(blog_id, post_id):
   logging.debug('Fetching labels for %d, %d' % (blog_id, post_id))
   f = urlfetch.fetch(POST_FETCH_URL % (blog_id, post_id))
   if f.status_code == 200:
-    p_json = json.loads(f.content.replace('\t', '\\t'))
+    # TODO this is a temporary fix. The second replacement for \x10 was happend
+    # on a Korean blog.
+    #p_json = json.loads(f.content.replace('\t', '\\t')
+    p_json = json.loads(f.content.replace('\t', '\\t').replace('\x10', '\\u0010'))
     entry = p_json['entry']
     labels = []
     if 'category' in entry:
@@ -180,7 +183,8 @@ def get_relates(blog_id, post_id, labels):
         p_json = json.loads(json_content)
       except ValueError:
         # TODO this is a temporary fix
-        p_json = json.loads(json_content.replace('\t', '\\t'))
+        #p_json = json.loads(json_content.replace('\t', '\\t'))
+        p_json = json.loads(json_content.replace('\t', '\\t').replace('\x10', '\\u0010'))
 
     # TODO G-Data v2 seems to resolve the problem
     if 'type' in p_json and p_json['type'] == 'error':

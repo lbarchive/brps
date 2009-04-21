@@ -87,19 +87,23 @@ def get_chart_uri(key, cache_time=300):
 
   # Rearrange counts from oldest to recent
   s_counts = [str(counts[(curr_hour + i + 1) % 24]) for i in range(24)]
-  
-  chtt = 'Completed request in 24-hour moving window|Times in UTC'
+  def format_count(count):
+    if count < 1000:
+      return str(count)
+    return ('%.2g' % (count / 1000.0)).split('e')[0] + 'k'
+  s_counts_label = [format_count(count) for count in counts]
+
   chxt = 't,x,x,y'
   chxl = '0:|23 Hours ago' + '|'*11 +'12 Hours ago' + '|'*12 + 'This hour|'
-  chxl += '1:|%s|' % '|'.join(s_counts)
+  chxl += '1:|%s|' % '|'.join(s_counts_label)
   chxl += '2:|%s|' % '|'.join(
       [str((curr_hour + i + 1) % 24) for i in range(24)])
   chxl += '3:|%s' % '|'.join([str(min_count), str((min_count + max_count) / 2),
       str(max_count)])
   chd = ','.join(s_counts)
   chart_uri = "http://chart.apis.google.com/chart?chs=600x200&chf=bg,s,F5EDE3&\
-chtt=%s&cht=bvs&chco=4D89F9&chbh=a&chd=t:%s&chds=%d,%d&chxt=%s&chxl=%s" % \
-      (chtt, chd, min_count, max_count, chxt, chxl)
+cht=bvs&chco=4D89F9&chbh=a&chd=t:%s&chds=%d,%d&chxt=%s&chxl=%s" % \
+      (chd, min_count, max_count, chxt, chxl)
   if cache_time > 0:
     memcache.set('simple24_%s_chart_uri' % key, chart_uri, cache_time)
   return chart_uri

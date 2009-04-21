@@ -13,11 +13,18 @@
 {% include "header.html" %}
 <div id="content">
 <h2>Statistics</h2>
-<p>Completed requests last 24 hours: {{ completed_requests }} request{{ completed_requests|pluralize }}</p>
+<h3>Completed requests</h3>
+<p>Last 24 hours: {{ completed_requests }} request{{ completed_requests|pluralize }}</p>
 <p style="text-align:center">
 <img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri|escape }}" alt="Chart of completed requests in last 24 hours" title="Chart of completed requests in last 24 hours"/><br/>
 Chart regenerates every 5 minutes.
 </p>
+<h3>Active blogs</h3>
+<p style="text-align:center">
+<img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri_active_blogs|escape }}" alt="Chart of active blogs in last 24 hours" title="Chart of active blogs in last 24 hours"/><br/>
+Chart regenerates every 5 minutes.
+</p>
+
 <h2>{{ blogs|length }} Active Blog{{ blogs|length|pluralize }}</h2>
 {% if blogs %}
 <ul>

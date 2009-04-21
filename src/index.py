@@ -46,7 +46,7 @@ import Simple24
 
 BASE_API_URI = 'http://www.blogger.com/feeds/'
 BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/default?v=2&alt=json&max-results=0'
-BLOGS_RESET = 60 * 60 * 6
+BLOGS_RESET = 60 * 60 * 1
 
 
 def send_json(response, obj, callback):
@@ -102,6 +102,7 @@ class StatsPage(webapp.RequestHandler):
     template_values = {
       'completed_requests': Simple24.get_count('completed_requests'),
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
+      'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'blogs': blogs,
       'blogs_reset': memcache.get('blogs_reset'),
       'before_head_end': config.before_head_end,
@@ -181,15 +182,20 @@ does not support private blog.', callback)
           try:
             f = fetch(BLOG_POSTS_FEED % blog_id)
             if f.status_code == 200:
-              p_json = json.loads(f.content.replace('\t', '\\t'))
+              # TODO this is a temporary fix
+              #p_json = json.loads(f.content.replace('\t', '\\t'))
+              p_json = json.loads(f.content.replace('\t', '\\t').replace('\x10', '\\u0010'))
               blog_name = p_json['feed']['title']['$t'].strip()
               blog_uri = ''
               for link in p_json['feed']['link']:
                 if link['rel'] == 'alternate' and link['type'] == 'text/html':
                   blog_uri = link['href']
                   break
+              # Put blog in
               blogs[blog_id] = (blog_name, blog_uri)
               memcache.set('blogs', blogs)
+              # Count in
+              Simple24.incr('active_blogs')
             else:
               logging.info('Unable to fetch blog info %s, %d.' % \
                   (blog_id, f.status_code))
