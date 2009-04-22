@@ -91,7 +91,7 @@ def get_chart_uri(key, cache_time=300):
     if count < 1000:
       return str(count)
     return ('%.2g' % (count / 1000.0)).split('e')[0] + 'k'
-  s_counts_label = [format_count(count) for count in counts]
+  s_counts_label = [format_count(counts[(curr_hour + i + 1) % 24]) for i in range(24)]
 
   chxt = 't,x,x,y'
   chxl = '0:|23 Hours ago' + '|'*11 +'12 Hours ago' + '|'*12 + 'This hour|'
