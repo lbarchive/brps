@@ -40,6 +40,7 @@ except ImportError:
 
 import config
 from brps import post, util
+from brps.util import json_str_sanitize
 from brps.post import PrivateBlogError
 import Simple24
 
@@ -182,9 +183,7 @@ does not support private blog.', callback)
           try:
             f = fetch(BLOG_POSTS_FEED % blog_id)
             if f.status_code == 200:
-              # TODO this is a temporary fix
-              #p_json = json.loads(f.content.replace('\t', '\\t'))
-              p_json = json.loads(f.content.replace('\t', '\\t').replace('\x10', '\\u0010'))
+              p_json = json.loads(json_str_sanitize(f.content))
               blog_name = p_json['feed']['title']['$t'].strip()
               blog_uri = ''
               for link in p_json['feed']['link']:

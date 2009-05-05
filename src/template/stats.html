@@ -26,6 +26,7 @@ Chart regenerates every 5 minutes.
 </p>
 
 <h2>{{ blogs|length }} Active Blog{{ blogs|length|pluralize }}</h2>
+{% comment %}
 {% if blogs %}
 <ul>
 {% for blog in blogs %}
@@ -34,6 +35,7 @@ Chart regenerates every 5 minutes.
 </ul>
 Resets in {{ blogs_reset|timeuntil }}.
 {% endif %}
+{% endcomment %}
 </div>
 {% include "footer.html" %}
 </div>

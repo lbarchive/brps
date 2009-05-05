@@ -47,3 +47,10 @@ def fetch(uri, username='', password=''):
   f = urlfetch.fetch(uri, headers=headers)
   logging.debug('Fetching %s (%s): %d' % (uri, username, f.status_code))
   return f
+
+def json_str_sanitize(json);
+  '''The serialized JSON string from Blogger Data currently contain illegal
+  character (to the specification of JSON), they need to be fixed or simplejson
+  will complain.'''
+
+  return json.replace('\t', '\\t').replace('\x01', '\\u0001').replace('\x10', '\\u0010'))
