@@ -25,6 +25,10 @@ import logging
 from google.appengine.api import urlfetch 
 
 
+CTRLCHR = [('\x01', u''), (u'\t', u'\\t'), (u'\x10', u''), (u'\x16', u''),
+    (u'\x1f', u''), (u'\x8b', '')]
+
+
 def td_seconds(t):
   """Returns timedelta of now to t in seconds"""
   td = (datetime.datetime.utcnow() - t)
@@ -53,4 +57,8 @@ def json_str_sanitize(json):
   character (to the specification of JSON), they need to be fixed or simplejson
   will complain.'''
 
-  return json.replace('\t', '\\t').replace('\x01', '\\u0001').replace('\x10', '\\u0010')
+  if not isinstance(json, unicode):
+    json = json.decode('utf-8')
+  for ctrl, rep in CTRLCHR:
+    json = json.replace(ctrl, rep)
+  return json
