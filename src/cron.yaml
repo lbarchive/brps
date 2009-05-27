@@ -1,0 +1,4 @@
+cron:
+- description: remove old posts
+  url: /admin/cleanoldposts
+  schedule: every saturday 08:00

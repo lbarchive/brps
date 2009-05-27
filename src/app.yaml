@@ -24,7 +24,11 @@ handlers:
   static_files: brps.js
   upload: brps.js
 
-- url: /admin
+- url: /admin/cleanoldposts
+  script: cron.py
+  login: admin
+
+- url: /admin*
   script: admin.py
   login: admin
 
