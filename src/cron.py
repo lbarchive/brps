@@ -35,11 +35,11 @@ class CleanUp(webapp.RequestHandler):
     if count:
       # 2009-05-27T08:06:58+0800
       # BadRequestError: cannot delete more than 500 entities in a single call
-      if count > 500:
-        count = 500
+      if count > 100:
+        count = 100
       self.response.out.write('Trying to delete %d posts...' % count)
       db.delete(posts.fetch(count))
-      self.response.out.write('deleted succesfully.' % count)
+      self.response.out.write('deleted succesfully.')
     else:
       self.response.out.write('No posts need to be removed')
 
