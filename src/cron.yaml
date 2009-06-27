@@ -1,4 +1,4 @@
 cron:
 - description: remove old posts
   url: /admin/cleanoldposts
-  schedule: every day 08:00
+  schedule: every 6 hours
