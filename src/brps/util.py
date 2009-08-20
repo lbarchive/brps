@@ -26,8 +26,8 @@ from google.appengine.api import urlfetch
 
 
 CTRLCHR = [(u'\x01', u''), (u'\x03', u''), (u'\t', u'\\t'), (u'\x08', u''),
-    (u'\x0f', u''), (u'\x10', u''), (u'\x16', u''), (u'\x1a', u''),
-    (u'\x1f', u''), (u'\x8b', '')]
+    (u'\x0f', u''), (u'\x10', u''), (u'\x13', u''), (u'\x16', u''),
+    (u'\x1a', u''), (u'\x1d', u''), (u'\x1f', u''), (u'\x8b', '')]
 
 
 def td_seconds(t):
