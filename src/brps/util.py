@@ -28,6 +28,7 @@ from google.appengine.api import urlfetch
 CTRLCHR = [(u'\x01', u''), (u'\x02', u''), (u'\x03', u''), (u'\x05', u''),
     (u'\t', u'\\t'), (u'\x08', u''), (u'\x0b', u''), 
     (u'\x0f', u''), (u'\x10', u''), (u'\x11', u''), (u'\x13', u''),
+    (u'\x14', u''),
     (u'\x15', u''), (u'\x16', u''), (u'\x17', u''), (u'\x19', u''),
     (u'\x1a', u''), (u'\x1d', u''), (u'\x1f', u''), (u'\x8b', '')]
 
