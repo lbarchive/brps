@@ -16,26 +16,15 @@
 <h3>Completed requests</h3>
 <p>Last 24 hours: {{ completed_requests }} request{{ completed_requests|pluralize }}</p>
 <p style="text-align:center">
-<img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri|escape }}" alt="Chart of completed requests in last 24 hours" title="Chart of completed requests in last 24 hours"/><br/>
-Chart regenerates every 5 minutes.
+<img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri|escape }}" alt="Chart of completed requests in last 24 hours" title="Chart of completed requests in last 24 hours"/>
 </p>
 <h3>Active blogs</h3>
 <p style="text-align:center">
 <img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri_active_blogs|escape }}" alt="Chart of active blogs in last 24 hours" title="Chart of active blogs in last 24 hours"/><br/>
-Chart regenerates every 5 minutes.
 </p>
 
-<h2>{{ blogs|length }} Active Blog{{ blogs|length|pluralize }}</h2>
-{% comment %}
-{% if blogs %}
-<ul>
-{% for blog in blogs %}
-  <li><a href="{{ blog.1 }}" rel="nofollow">{{ blog.0|escape }}</a><br/><a class="uri" href="{{ blog.1 }}" rel="nofollow">{{ blog.1|escape }}</a></li>
-{% endfor %}
-</ul>
-Resets in {{ blogs_reset|timeuntil }}.
-{% endif %}
-{% endcomment %}
+<p style="text-align:center">{{ blogs|length }} active blog{{ blogs|length|pluralize }} within this hour.</p>
+<p style="text-align:center">Charts are regenerated every 5 minutes.</p>
 </div>
 {% include "footer.html" %}
 </div>

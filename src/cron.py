@@ -24,12 +24,16 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from brps import post, util
 
 
+# In days
+POST_AGE_TO_DELETE = 7
+
+
 class CleanUp(webapp.RequestHandler):
   
   def get(self):
     
     posts = post.Post.all()
-    posts.filter('last_updated <', util.now() + timedelta(days=-30))
+    posts.filter('last_updated <', util.now() + timedelta(days=-1 * POST_AGE_TO_DELETE))
     posts.order('last_updated')
     count = posts.count()
     if count:

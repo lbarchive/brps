@@ -105,7 +105,7 @@ class StatsPage(webapp.RequestHandler):
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'blogs': blogs,
-      'blogs_reset': memcache.get('blogs_reset'),
+#      'blogs_reset': memcache.get('blogs_reset'),
       'before_head_end': config.before_head_end,
       'after_footer': config.after_footer,
       'before_body_end': config.before_body_end,
@@ -174,11 +174,15 @@ does not support private blog.', callback)
         Simple24.incr('completed_requests')
         # Add to blog list
         blogs = memcache.get('blogs')
-        blogs_reset = memcache.get('blogs_reset')
-        if blogs is None or blogs_reset is None:
+        
+        curr_hour = util.now().hour
+        idx_hour = memcache.get('blogs_hour_index')
+        if blogs is None or idx_hour != curr_hour:
+          # hour changes
+          memcache.set('blogs_hour_index', curr_hour)
           blogs = {}
           memcache.set('blogs', blogs)
-          memcache.set('blogs_reset', util.now() + timedelta(seconds=BLOGS_RESET), BLOGS_RESET)
+          
         if blog_id not in blogs:
           try:
             f = fetch(BLOG_POSTS_FEED % blog_id)
@@ -190,11 +194,11 @@ does not support private blog.', callback)
                 if link['rel'] == 'alternate' and link['type'] == 'text/html':
                   blog_uri = link['href']
                   break
+              # Count in
+              Simple24.incr('active_blogs')
               # Put blog in
               blogs[blog_id] = (blog_name, blog_uri)
               memcache.set('blogs', blogs)
-              # Count in
-              Simple24.incr('active_blogs')
             else:
               logging.info('Unable to fetch blog info %s, %d.' % \
                   (blog_id, f.status_code))
