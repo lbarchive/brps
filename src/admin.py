@@ -62,12 +62,13 @@ class ReviewPage(webapp.RequestHandler):
 
     query = db.Query(blog.Blog)
     query.filter('last_reviewed =', None)
-    query.filter('blocked =', False)
+    query.filter('accepted =', None)
     query.order('last_reviewed')
     blogs = query.fetch(10)
 
     query = db.Query(blog.Blog)
     query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * BLOG_REVIEW_INTERVAL))
+    query.filter('accepted =', None)
     query.order('last_reviewed')
     template_values = {
       'new_blogs': blogs,
@@ -115,11 +116,30 @@ class BlockJSON(webapp.RequestHandler):
     send_json(self.response, {'blog_id': str(blog_id)}, callback)
 
 
+class AcceptJSON(webapp.RequestHandler):
+
+  def get(self):
+
+    callback = self.request.get('callback')
+    blog_id = int(self.request.get('blog_id'))
+    if not blog_id:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    b = blog.get(blog_id)
+    if not b:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    blog.accept(blog_id)
+    send_json(self.response, {'blog_id': str(blog_id)}, callback)
+
 
 application = webapp.WSGIApplication(
     [('/admin', AdminPage),
      ('/admin/review', ReviewPage),
      ('/admin/reviewed.json', ReviewedJSON),
+     ('/admin/accept.json', AcceptJSON),
      ('/admin/block.json', BlockJSON),
      ],
     debug=True)

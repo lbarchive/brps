@@ -102,7 +102,7 @@ class GetPage(webapp.RequestHandler):
     try:
       blog_id = int(self.request.get('blog'))
       b = blog.get(blog_id)
-      if b.blocked:
+      if b.accepted == False:
         # Blocked blog
         logging.debug('Blocked blog: %d' % blog_id)
         json_error(self.response, 4, 'This blog is blocked from using \

@@ -54,6 +54,21 @@
   background-color: green;
 }
 
+.review-blog .stuff .accept-button {
+  float: left;
+  margin-left: 20px;
+  color: blue;
+}
+
+.review-blog .stuff .accept-button a {
+  color: blue;
+}
+
+.review-blog .stuff .accept-button a:hover {
+  color: white;
+  background-color: blue;
+}
+
 .review-blog .stuff .block-button {
   float: right;
   color: red;

@@ -3,7 +3,8 @@
   <a href="{{ blog.uri }}" rel="nofollow">{{ blog.name|escape }}</a><br/><a class="uri" href="{{ blog.uri }}" rel="nofollow">{{ blog.uri|escape }}</a>
 </div>
 <div class="stuff">
-  <div class="reviewed-button"><a href="javascript:reviewed('{{ blog.blog_id }}')" class="reviewed">Mark as Reviewed</a></div>
-  <div class="block-button"><a href="javascript:block('{{ blog.blog_id }}')" class="block">Block this blog</a></div>
+  <div class="reviewed-button"><a href="javascript:reviewed('{{ blog.blog_id }}')" class="reviewed">Reviewed</a></div>
+  <div class="accept-button"><a href="javascript:accept('{{ blog.blog_id }}')" class="accept">Accept</a></div>
+  <div class="block-button"><a href="javascript:block('{{ blog.blog_id }}')" class="block">Block</a></div>
 </div>
 </div>

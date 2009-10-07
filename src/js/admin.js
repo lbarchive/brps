@@ -44,6 +44,30 @@ function reviewed(blog_id) {
   }
 
 
+// accept
+function accept(blog_id) {
+  var query_url = 'http://brps.appspot.com/admin/';
+  if (window.location.href.indexOf('localhost') >= 0)
+    query_url = 'http://localhost:8080/admin/';
+  if (blog_id == '#')
+    return;
+  $.getJSON(query_url + 'accept.json?blog_id=' + blog_id + '&callback=?', function(json) {
+    if (json.code == 0) {
+      $("a.accept").each(function(){
+        var $ele = $(this)
+        if ($ele.attr('href').indexOf("('" + json.blog_id + "')") >= 0) {
+          $ele.replaceWith("Accepted");
+          $('#messages').html();
+          return false;
+          }
+        });
+      }
+    else
+      $('#messages').html(json.error);
+    });
+  }
+
+
 // block
 function block(blog_id) {
   var query_url = 'http://brps.appspot.com/admin/';

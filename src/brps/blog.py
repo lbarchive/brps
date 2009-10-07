@@ -40,15 +40,14 @@ UPDATE_INTERVAL = 86400 * 30
 BASE_API_URI = 'http://www.blogger.com/feeds/'
 BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/default?v=2&alt=json&max-results=0'
 
-
 class Blog(db.Model):
   """Blog data model"""
   blog_id = db.IntegerProperty()
   name = db.TextProperty()
   uri = db.TextProperty()
   last_updated = db.DateTimeProperty()
-  last_reviewed = db.DateTimeProperty()
-  blocked = db.BooleanProperty(default=False)
+  last_reviewed = db.DateTimeProperty(default=None)
+  accepted = db.BooleanProperty(default=None)
 
 
 def get(blog_id):
@@ -117,13 +116,26 @@ def reviewed(blog_id):
   memcache.set(key_name, b)
 
 
-def block(blog_id):
-  '''Mark a blog as reviewed'''
+def accept(blog_id):
+  '''Mark a blog as accepted'''
   b = get(blog_id)
   if not b:
     return None
 
-  b.blocked = True
+  b.accepted = True
+  b.put()
+
+  key_name = 'b%d' % blog_id
+  memcache.set(key_name, b)
+
+
+def block(blog_id):
+  '''Mark a blog as blocked'''
+  b = get(blog_id)
+  if not b:
+    return None
+
+  b.accepted = False
   b.put()
 
   key_name = 'b%d' % blog_id
