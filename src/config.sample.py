@@ -5,9 +5,6 @@
 # Settings
 ##########
 
-# Blogs that you want to block
-blocked_blog_ids = {0: 'reason'}
-
 
 ##########
 # Template

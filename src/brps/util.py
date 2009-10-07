@@ -24,6 +24,8 @@ import logging
 
 from google.appengine.api import urlfetch 
 
+import simplejson as json
+
 
 CTRLCHR = [(u'\x01', u''), (u'\x02', u''), (u'\x03', u''),
     (u'\x04', u''), (u'\x05', u''), (u'\x06', u''), (u'\x07', u'\\t'),
@@ -47,6 +49,7 @@ def now(utc=True):
     return datetime.datetime.utcnow()
   return datetime.datetime.now()
 
+
 def fetch(uri, username='', password=''):
   """Can fetch with Basic Authentication"""
   headers = {}
@@ -57,6 +60,36 @@ def fetch(uri, username='', password=''):
   f = urlfetch.fetch(uri, headers=headers)
   logging.debug('Fetching %s (%s): %d' % (uri, username, f.status_code))
   return f
+
+
+def send_json(response, obj, callback):
+  """Sends JSON to client-side"""
+  json_result = obj
+  if not isinstance(obj, (str, unicode)):
+    if 'code' not in obj:
+      obj['code'] = 0
+    json_result = json.dumps(obj)
+
+  response.headers['Content-Type'] = 'application/json'
+  if callback:
+    response.out.write('%s(%s)' % (callback, json_result))
+  else:
+    response.out.write(json_result)
+
+
+def json_error(response, code, msg, callback):
+  """Sends error in JSON to client-side
+  Error codes:
+  # 1 - Missing Ids
+  # 2 - GAE problem
+  # 3 - Server is processing, try again
+  # 4 - Blocked Blog
+  # 5 - Private blog is not supported
+  # 99 - Unknown problem
+  # TODO sends 500
+  """
+  send_json(response, {'code': code, 'error': msg}, callback)
+
 
 def json_str_sanitize(json):
   '''The serialized JSON string from Blogger Data currently contain illegal

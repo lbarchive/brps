@@ -39,42 +39,10 @@ except ImportError:
   from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 
 import config
-from brps import post, util
-from brps.util import json_str_sanitize
+from brps import blog, post, util
+from brps.util import json_error, json_str_sanitize, send_json
 from brps.post import PrivateBlogError
 import Simple24
-
-
-BASE_API_URI = 'http://www.blogger.com/feeds/'
-BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/default?v=2&alt=json&max-results=0'
-BLOGS_RESET = 60 * 60 * 1
-
-
-def send_json(response, obj, callback):
-  """Sends JSON to client-side"""
-  json_result = obj
-  if not isinstance(obj, (str, unicode)):
-    json_result = json.dumps(obj)
-
-  response.headers['Content-Type'] = 'application/json'
-  if callback:
-    response.out.write('%s(%s)' % (callback, json_result))
-  else:
-    response.out.write(json_result)
-
-
-def json_error(response, code, msg, callback):
-  """Sends error in JSON to client-side
-  Error codes:
-  # 1 - Missing Ids
-  # 2 - GAE problem
-  # 3 - Server is processing, try again
-  # 4 - Blocked Blog
-  # 5 - Private blog is not supported
-  # 99 - Unknown problem
-  # TODO sends 500
-  """
-  send_json(response, {'code': code, 'error': msg}, callback)
 
 
 class HomePage(webapp.RequestHandler):
@@ -133,14 +101,14 @@ class GetPage(webapp.RequestHandler):
     callback = self.request.get('callback')
     try:
       blog_id = int(self.request.get('blog'))
-      if blog_id in config.blocked_blog_ids:
+      b = blog.get(blog_id)
+      if b.blocked:
         # Blocked blog
         logging.debug('Blocked blog: %d' % blog_id)
         json_error(self.response, 4, 'This blog is blocked from using \
-<a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
-because of %s. If you are the blog owner and believe this blocking is \
-a mistake, please contact the author of BRPS.' % \
-            config.blocked_blog_ids[blog_id], callback)
+<a href="http://brps.appspot.com/">Blogger Related Posts Service</a>. \
+If you are the blog owner and believe this blocking is \
+a mistake, please contact the author of BRPS.', callback)
         return
       post_id = int(self.request.get('post'))
       max_results = int(self.request.get('max_results', post.MAX_POSTS))
@@ -185,19 +153,11 @@ does not support private blog.', callback)
           
         if blog_id not in blogs:
           try:
-            f = fetch(BLOG_POSTS_FEED % blog_id)
-            if f.status_code == 200:
-              p_json = json.loads(json_str_sanitize(f.content))
-              blog_name = p_json['feed']['title']['$t'].strip()
-              blog_uri = ''
-              for link in p_json['feed']['link']:
-                if link['rel'] == 'alternate' and link['type'] == 'text/html':
-                  blog_uri = link['href']
-                  break
+            if b:
               # Count in
               Simple24.incr('active_blogs')
               # Put blog in
-              blogs[blog_id] = (blog_name, blog_uri)
+              blogs[blog_id] = (b.name, b.uri)
               memcache.set('blogs', blogs)
             else:
               logging.info('Unable to fetch blog info %s, %d.' % \

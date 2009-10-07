@@ -19,16 +19,22 @@
 """Admin interface"""
 
 
+from datetime import datetime, timedelta
+import logging
 import os
 
 from google.appengine.api import memcache
-from google.appengine.ext import webapp
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 import config
-from brps import post, util
+from brps import blog, post, util
+from brps.util import json_error, send_json
 import Simple24
+
+
+BLOG_REVIEW_INTERVAL = 86400 * 90
 
 
 class AdminPage(webapp.RequestHandler):
@@ -50,8 +56,71 @@ class AdminPage(webapp.RequestHandler):
     self.response.out.write(template.render(path, template_values))
 
 
+class ReviewPage(webapp.RequestHandler):
+
+  def get(self):
+
+    query = db.Query(blog.Blog)
+    query.filter('last_reviewed =', None)
+    query.filter('blocked =', False)
+    query.order('last_reviewed')
+    blogs = query.fetch(10)
+
+    query = db.Query(blog.Blog)
+    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * BLOG_REVIEW_INTERVAL))
+    query.order('last_reviewed')
+    template_values = {
+      'new_blogs': blogs,
+      'old_blogs': [b for b in query.fetch(10) if b.last_reviewed != None],
+      }
+    path = os.path.join(os.path.dirname(__file__), 'template/admin_review.html')
+    self.response.out.write(template.render(path, template_values))
+
+
+class ReviewedJSON(webapp.RequestHandler):
+
+  def get(self):
+
+    callback = self.request.get('callback')
+    blog_id = int(self.request.get('blog_id'))
+    if not blog_id:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    b = blog.get(blog_id)
+    if not b:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    blog.reviewed(blog_id)
+    send_json(self.response, {'blog_id': str(blog_id)}, callback)
+
+
+class BlockJSON(webapp.RequestHandler):
+
+  def get(self):
+
+    callback = self.request.get('callback')
+    blog_id = int(self.request.get('blog_id'))
+    if not blog_id:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    b = blog.get(blog_id)
+    if not b:
+      json_error(self.response, 99, callback, 'No blog_id specified')
+      return
+
+    blog.block(blog_id)
+    send_json(self.response, {'blog_id': str(blog_id)}, callback)
+
+
+
 application = webapp.WSGIApplication(
     [('/admin', AdminPage),
+     ('/admin/review', ReviewPage),
+     ('/admin/reviewed.json', ReviewedJSON),
+     ('/admin/block.json', BlockJSON),
      ],
     debug=True)
 
