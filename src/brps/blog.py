@@ -50,6 +50,21 @@ class Blog(db.Model):
   accepted = db.BooleanProperty(default=None)
 
 
+def get_blog_name_uri(blog_id):
+
+  f = fetch(BLOG_POSTS_FEED % blog_id)
+  if f.status_code == 200:
+    p_json = json.loads(json_str_sanitize(f.content))
+    blog_name = p_json['feed']['title']['$t'].strip()
+    blog_uri = ''
+    for link in p_json['feed']['link']:
+      if link['rel'] == 'alternate' and link['type'] == 'text/html':
+        blog_uri = link['href']
+        return (blog_name, blog_uri)
+  logging.warning('Unable to retrieve blog name and uri: %s' % blog_id)
+  return None
+
+
 def get(blog_id):
   """Returns blog from memcache or datastore
 
@@ -65,20 +80,13 @@ def get(blog_id):
       memcache.add(key_name, b, BLOG_CACHE_TIME)
     # Check if need to update
     if util.td_seconds(b.last_updated) > UPDATE_INTERVAL:
-      f = fetch(BLOG_POSTS_FEED % blog_id)
-      if f.status_code == 200:
-        p_json = json.loads(json_str_sanitize(f.content))
-        blog_name = p_json['feed']['title']['$t'].strip()
-        blog_uri = ''
-        for link in p_json['feed']['link']:
-          if link['rel'] == 'alternate' and link['type'] == 'text/html':
-            blog_uri = link['href']
-            break
-      else:
-        return None
-      b = db.run_in_transaction(transaction_update_blog, blog_id, blog_name,
-          blog_uri)
-      memcache.set(key_name, b, BLOG_CACHE_TIME)
+      b_nu = get_blog_name_uri(blog_id)
+      # If couldn't get an updated name and uri, then return old b from cache
+      # or data store.
+      if b_nu:
+        b = db.run_in_transaction(transaction_update_blog, blog_id, b_nu[0],
+            b_nu[1])
+        memcache.set(key_name, b, BLOG_CACHE_TIME)
     return b
   return None
 
@@ -88,19 +96,12 @@ def add(blog_id):
   logging.debug('Adding blog %d' % blog_id)
   key_name = 'b%d' % blog_id
   f = fetch(BLOG_POSTS_FEED % blog_id)
-  if f.status_code == 200:
-    p_json = json.loads(json_str_sanitize(f.content))
-    blog_name = p_json['feed']['title']['$t'].strip()
-    blog_uri = ''
-    for link in p_json['feed']['link']:
-      if link['rel'] == 'alternate' and link['type'] == 'text/html':
-        blog_uri = link['href']
-        break
-  else:
-    return None
-  b = db.run_in_transaction(transaction_add_blog, blog_id, blog_name, blog_uri)
-  memcache.set(key_name, b, BLOG_CACHE_TIME)
-  return b
+  b_nu = get_blog_name_uri(blog_id)
+  if b_nu:
+    b = db.run_in_transaction(transaction_add_blog, blog_id, b_nu[0], b_nu[1])
+    memcache.set(key_name, b, BLOG_CACHE_TIME)
+    return b
+  return None
 
 
 def reviewed(blog_id):

@@ -102,6 +102,12 @@ class GetPage(webapp.RequestHandler):
     try:
       blog_id = int(self.request.get('blog'))
       b = blog.get(blog_id)
+      if b is None:
+        json_error(self.response, 3, '\
+<a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
+could not retrieve information for blog from Blogger... \
+will retry in a few seconds...', callback)
+        return
       if b.accepted == False:
         # Blocked blog
         logging.debug('Blocked blog: %d' % blog_id)
