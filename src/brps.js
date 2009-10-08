@@ -18,8 +18,25 @@
 
 google.load('jquery', '1.3');
 google.setOnLoadCallback(function() {
+  BRPS_init_error_indicator()
   BRPS_get();
   });
+
+// Global error indicator
+function BRPS_init_error_indicator() {
+  $("#related_posts").ajaxError(function(event, request, settings){
+    var err_msg;
+    switch(request.status) {
+      case 403:
+        err_msg = "BRPS is temporarily out of service."
+        break;
+      default:
+        err_msg = "Unknown problem to retrieve related posts!";
+      }
+    $(this).html('<p>' + err_msg + '</p>');
+    });
+  }
+
 
 function BRPS_render_widget_title() {
   var $ = jQuery;
