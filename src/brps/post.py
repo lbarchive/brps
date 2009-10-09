@@ -75,6 +75,7 @@ class Post(db.Model):
   _relates_ = property(_get_relates, _set_relates)
 
 
+# TODO do not store data model Post to memcache, use Post._related_ directly.
 def get(blog_id, post_id):
   """Returns post from memcache or datastore
 
@@ -132,8 +133,7 @@ def get_labels(blog_id, post_id):
     entry = p_json['entry']
     labels = []
     if 'category' in entry:
-      for cat in entry['category']:
-        labels.append(cat['term'])
+      labels += [cat['term'] for cat in entry['category']]
     # Save it for 5 minutes in case of this post has too many labels to query
     memcache.set('b%dp%dlabels' % (blog_id, post_id), labels, 300)
     return labels
@@ -153,12 +153,11 @@ def get_relates(blog_id, post_id, labels):
   s_post_id = str(post_id)
   s_labels = sets.Set(labels)
   len_labels = len(labels)
-  entries = []
-  link_check = []
+  _entries = []
+  e_id_check = []
   for label in labels[:MAX_LABEL_QUERIES]:
-    p_json = None
-    json_content = memcache.get('b%dl%s' % (blog_id, label))
-    if json_content:
+    entries = memcache.get('b%dl%s-2' % (blog_id, label))
+    if entries is not None:
       logging.debug('Got label %s from memcache' % label)
     else:
       logging.debug('Querying label %s' % label)
@@ -166,9 +165,23 @@ def get_relates(blog_id, post_id, labels):
           urllib.quote(label.encode('utf-8'))))
       if f.status_code == 200:
         json_content = f.content
-        # TODO Process it before storing in memecache, there are many
-        # unnecessary stuff in JSON.
-        memcache.set('b%dl%s' % (blog_id, label), json_content,
+        p_json = json.loads(json_str_sanitize(json_content))
+        # Clean up, remove unnecessary data
+        entries = {}
+        if 'feed' in p_json and 'entry' in p_json['feed']:
+          for entry in p_json['feed']['entry']:
+            # entry['id']['$t']
+            _id = int(entry['id']['$t'].rsplit('-', 1)[1])
+            _title = entry['title']['$t']
+            _link = ''
+            for l in entry['link']:
+              if l['rel'] == 'alternate':
+                _link = l['href']
+                break
+            _labels = [cat['term'] for cat in entry['category']]
+            entries[_id] = {'title': _title, 'link': _link, 'labels': _labels}
+
+        memcache.set('b%dl%s-2' % (blog_id, label), entries,
             LABEL_QUERY_RESULT_CACHE_TIME)
       else:
         # Something went wrong when querying label for posts
@@ -176,61 +189,28 @@ def get_relates(blog_id, post_id, labels):
             f.status_code))
         continue
 
-    if json_content:
-      try:
-        p_json = json.loads(json_content)
-      except ValueError:
-        p_json = json.loads(json_str_sanitize(json_content))
-
-    # TODO G-Data v2 seems to resolve the problem
-    if 'type' in p_json and p_json['type'] == 'error':
-      # Something went wrong when querying label for posts
-      logging.warning('Unable to have correct label %s, %s' % (label,
-          p_json['details']))
-      continue
-
-    if 'feed' not in p_json:
-      logging.warning('Can find key feed in json!')
-      continue
-    if 'entry' not in p_json['feed']:
-      logging.warning('Can find key entry in json[feed]!')
-      continue
-
-    for entry in p_json['feed']['entry']:
-      if entry['id']['$t'].find(s_post_id) >= 0:
-        # Same post skip
+    for e_id in entries:
+      if e_id == post_id or e_id in e_id_check:
+        # Same post skip or we already have this post
         continue
+      entry = entries[e_id]
 
-      # Find the link to this related post
-      link = ''
-      for l in entry['link']:
-        if l['rel'] == 'alternate':
-          link = l['href']
-          break
-      # Skip if we already have this post
-      if link in link_check:
-        continue
-
-      c_labels = []
-      for cat in entry['category']:
-        c_labels.append(cat['term'])
-
-      match_count = len(s_labels & sets.Set(c_labels))
+      match_count = len(s_labels & sets.Set(entry['labels']))
       if not match_count:
         # No label is matched
         continue
 
-      entries.append((float(match_count) / len_labels, entry['title']['$t'],
-          link))
-      link_check.append(link)
+      _entries.append((float(match_count) / len_labels, entry['title'],
+          entry['link']))
+      e_id_check.append(e_id)
 
-  if entries:
-    entries.sort()
-    entries.reverse()
-    entries = entries[:MAX_POSTS]
+  if _entries:
+    _entries.sort()
+    _entries.reverse()
+    _entries = _entries[:MAX_POSTS]
     # jsonize the result
     entries_json = {'entry': [dict(zip(('score', 'title', 'link'), entry))\
-        for entry in entries]}
+        for entry in _entries]}
   else:
     entries_json = {'entry': []}
   return entries_json
