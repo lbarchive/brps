@@ -139,7 +139,7 @@ def get_labels(blog_id, post_id):
     return labels
   elif f.status_code == 401:
     raise PrivateBlogError
-  logging.error('Unable to fetch labels: %d' % f.status_code)
+  logging.warning('Unable to fetch labels: %d' % f.status_code)
   # FIXME should raise exception and get client a better understanding.
   return []
 
