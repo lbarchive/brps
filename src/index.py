@@ -73,7 +73,6 @@ class StatsPage(webapp.RequestHandler):
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'blogs': blogs,
-#      'blogs_reset': memcache.get('blogs_reset'),
       'before_head_end': config.before_head_end,
       'after_footer': config.after_footer,
       'before_body_end': config.before_body_end,
@@ -128,9 +127,12 @@ a mistake, please contact the author of BRPS.', callback)
 
     try:
       try:
-        p = post.get(blog_id, post_id)
-        if not p:
+        rlist = post.get_related_list(blog_id, post_id)
+        if rlist is None:
           p = post.add(blog_id, post_id)
+          rlist = p._relates_['entry']
+          key_name = 'b%dp%dl' % (blog_id, post_id)
+          memcache.add(key_name, rlist, post.POST_CACHE_TIME)
       except CapabilityDisabledError:
         logging.debug('Caught CapabilityDisabledError')
         json_error(self.response, 2,
@@ -142,20 +144,20 @@ a mistake, please contact the author of BRPS.', callback)
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 does not support private blog.', callback)
         return
-      if p:
-        relates = {'entry': p._relates_['entry'][:max_results]}
+      if rlist:
+        relates = {'entry': rlist[:max_results]}
         send_json(self.response, relates, callback)
         Simple24.incr('completed_requests')
         # Add to blog list
-        blogs = memcache.get('blogs')
+        blogs = memcache.get('blogs-1')
         
         curr_hour = util.now().hour
         idx_hour = memcache.get('blogs_hour_index')
         if blogs is None or idx_hour != curr_hour:
           # hour changes
           memcache.set('blogs_hour_index', curr_hour)
-          blogs = {}
-          memcache.set('blogs', blogs)
+          blogs = []
+          memcache.set('blogs-1', blogs)
           
         if blog_id not in blogs:
           try:
@@ -163,8 +165,8 @@ does not support private blog.', callback)
               # Count in
               Simple24.incr('active_blogs')
               # Put blog in
-              blogs[blog_id] = (b.name, b.uri)
-              memcache.set('blogs', blogs)
+              blogs.append(blog_id)
+              memcache.set('blogs-1', blogs)
             else:
               logging.info('Unable to fetch blog info %s, %d.' % \
                   (blog_id, f.status_code))

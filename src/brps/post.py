@@ -75,7 +75,6 @@ class Post(db.Model):
   _relates_ = property(_get_relates, _set_relates)
 
 
-# TODO do not store data model Post to memcache, use Post._related_ directly.
 def get(blog_id, post_id):
   """Returns post from memcache or datastore
 
@@ -83,12 +82,9 @@ def get(blog_id, post_id):
 
   if post_id:
     key_name = 'b%dp%d' % (blog_id, post_id)
-    p = memcache.get(key_name)
+    p = Post.get_by_key_name(key_name)
     if not p:
-      p = Post.get_by_key_name(key_name)
-      if not p:
-        return None
-      memcache.add(key_name, p, POST_CACHE_TIME)
+      return None
     # Check if need to update
     if util.td_seconds(p.last_updated) > UPDATE_INTERVAL:
       labels = get_labels(blog_id, post_id)
@@ -97,8 +93,22 @@ def get(blog_id, post_id):
         relates = get_relates(blog_id, post_id, labels)
       p = db.run_in_transaction(transaction_update_relates, blog_id, post_id,
           relates)
-      memcache.set(key_name, p, POST_CACHE_TIME)
     return p
+  return None
+
+
+def get_related_list(blog_id, post_id):
+
+  if post_id:
+    key_name = 'b%dp%dl' % (blog_id, post_id)
+    rlist = memcache.get(key_name)
+    if rlist is None:
+      p = get(blog_id, post_id)
+      if not p:
+        return None
+      rlist = p._relates_['entry']
+      memcache.add(key_name, rlist, POST_CACHE_TIME)
+    return rlist
   return None
 
 
@@ -108,14 +118,11 @@ def add(blog_id, post_id):
   p = get(blog_id, post_id)
   if p:
     return p
-  key_name = 'b%dp%d' % (blog_id, post_id)
-  # Get labels of post
   labels = get_labels(blog_id, post_id)
   relates = {'entry': []}
   if isinstance(labels, list):
     relates = get_relates(blog_id, post_id, labels)
     p = db.run_in_transaction(transaction_add_post, blog_id, post_id, relates)
-    memcache.set(key_name, p, POST_CACHE_TIME)
   return p
 
 
