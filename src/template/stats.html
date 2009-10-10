@@ -23,7 +23,7 @@
 <img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri_active_blogs|escape }}" alt="Chart of active blogs in last 24 hours" title="Chart of active blogs in last 24 hours"/><br/>
 </p>
 
-<p style="text-align:center">{{ blogs|length }} active blog{{ blogs|length|pluralize }} within this hour.</p>
+<p style="text-align:center">{{ active_blogs_count }} active blog{{ active_blogs_count|pluralize }} within this hour.</p>
 <p style="text-align:center">Charts are regenerated every 5 minutes.</p>
 </div>
 {% include "footer.html" %}

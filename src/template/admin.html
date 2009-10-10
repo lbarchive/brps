@@ -12,22 +12,7 @@
 <div id="wrap">
 {% include "admin_header.html" %}
 <div id="content">
-<h2>Statistics</h2>
-<h3>Completed requests</h3>
-<p>Completed requests last 24 hours: {{ completed_requests }} request{{ completed_requests|pluralize }}</p>
-<p style="text-align:center">
-<img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri|escape }}" alt="Chart of completed requests in last 24 hours" title="Chart of completed requests in last 24 hours"/>
-</p>
-<p style="text-align:center">Chart is regenerated every 5 minutes.</p>
-<h3>Active blogs</h3>
-<p style="text-align:center">{{ blogs|length }} active blog{{ blogs|length|pluralize }} within this hour.</p>
-{% if blogs %}
-<ul>
-{% for blog in blogs %}
-  <li><a href="{{ blog.1 }}" rel="nofollow">{{ blog.0|escape }}</a><br/><a class="uri" href="{{ blog.1 }}" rel="nofollow">{{ blog.1|escape }}</a></li>
-{% endfor %}
-</ul>
-{% endif %}
+<h2>Admin</h2>
 </div>
 {% include "footer.html" %}
 </div>

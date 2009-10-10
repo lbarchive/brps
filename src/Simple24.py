@@ -60,6 +60,15 @@ def full_count(key):
   return total_count
 
 
+def get_current_hour_count(key):
+
+  hour = datetime.utcnow().hour
+  count = memcache.get('simple24_%s_%d' % (key, hour))
+  if count is None:
+    return 0
+  return count
+
+
 def get_hourly_counts(key):
   """Returns 24 counters"""
   counts = []
