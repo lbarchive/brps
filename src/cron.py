@@ -21,7 +21,7 @@ from datetime import timedelta
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from brps import post, util
+from brps import util
 
 
 # In days
@@ -31,18 +31,17 @@ POST_AGE_TO_DELETE = 7
 class CleanUp(webapp.RequestHandler):
   
   def get(self):
-    
-    posts = post.Post.all()
-    posts.filter('last_updated <', util.now() + timedelta(days=-1 * POST_AGE_TO_DELETE))
-    posts.order('last_updated')
-    count = posts.count()
+
+    q = db.GqlQuery("SELECT __key__ FROM Post WHERE last_updated < :1",
+        util.now() + timedelta(days=-1 * POST_AGE_TO_DELETE))
+    count = q.count()
     if count:
       # 2009-05-27T08:06:58+0800
       # BadRequestError: cannot delete more than 500 entities in a single call
       if count > 100:
         count = 100
       self.response.out.write('Trying to delete %d posts...' % count)
-      db.delete(posts.fetch(count))
+      db.delete(q.fetch(count))
       self.response.out.write('deleted succesfully.')
     else:
       self.response.out.write('No posts need to be removed')

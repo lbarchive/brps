@@ -13,8 +13,15 @@
 {% include "header.html" %}
 <div id="content">
 <h2>Statistics</h2>
+<p>
+Blog entity count: {{ db_blog_count }}<br/>
+Post entity count: {{ db_post_count }}<br/>
+Active blog count: {{ active_blogs_count }} (Resets hourly)<br/>
+Completed Requests: {{ completed_requests }} (Last 24 Hours)
+</p>
+<h2>Charts</h2>
+<p style="text-align:center">Charts are regenerated every 5 minutes.</p>
 <h3>Completed requests</h3>
-<p>Last 24 hours: {{ completed_requests }} request{{ completed_requests|pluralize }}</p>
 <p style="text-align:center">
 <img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri|escape }}" alt="Chart of completed requests in last 24 hours" title="Chart of completed requests in last 24 hours"/>
 </p>
@@ -22,9 +29,6 @@
 <p style="text-align:center">
 <img src="{# This is a XML+HTML, therefore escape the html #}{{ chart_uri_active_blogs|escape }}" alt="Chart of active blogs in last 24 hours" title="Chart of active blogs in last 24 hours"/><br/>
 </p>
-
-<p style="text-align:center">{{ active_blogs_count }} active blog{{ active_blogs_count|pluralize }} within this hour.</p>
-<p style="text-align:center">Charts are regenerated every 5 minutes.</p>
 </div>
 {% include "footer.html" %}
 </div>

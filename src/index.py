@@ -28,6 +28,7 @@ from google.appengine.api import memcache
 from google.appengine.api.datastore_errors import Timeout
 from google.appengine.api.urlfetch import DownloadError, fetch
 from google.appengine.ext import webapp
+from google.appengine.ext.db import stats
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.runtime.apiproxy_errors import ApplicationError, CapabilityDisabledError
@@ -66,11 +67,30 @@ class StatsPage(webapp.RequestHandler):
 
   def get(self):
     """Get method handler"""
+    db_blog_count = memcache.get('db_blog_count')
+    if db_blog_count is None:
+      blog_stat = stats.KindStat.all().filter('kind_name =', 'Blog').get()
+      if blog_stat is None:
+        db_blog_count = 'Unavailable'
+      else:
+        db_blog_count = blog_stat.count
+      memcache.set('db_blog_count', db_blog_count, 3600)
+    db_post_count = memcache.get('db_post_count')
+    if db_post_count is None:
+      post_stat = stats.KindStat.all().filter('kind_name =', 'Post').get()
+      if post_stat is None:
+        db_post_count = 'Unavailable'
+      else:
+        db_post_count = post_stat.count
+      memcache.set('db_post_count', db_post_count, 3600)
+      
     template_values = {
       'completed_requests': Simple24.get_count('completed_requests'),
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'active_blogs_count': Simple24.get_current_hour_count('active_blogs'),
+      'db_blog_count': db_blog_count,
+      'db_post_count': db_post_count,
       'before_head_end': config.before_head_end,
       'after_footer': config.after_footer,
       'before_body_end': config.before_body_end,
