@@ -162,7 +162,7 @@ a mistake, please contact the author of BRPS.', callback)
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 does not support private blog.', callback)
         return
-      if rlist:
+      if rlist is not None:
         relates = {'entry': rlist[:max_results]}
         send_json(self.response, relates, callback)
         Simple24.incr('completed_requests')
