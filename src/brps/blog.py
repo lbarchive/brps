@@ -156,7 +156,7 @@ def transaction_add_blog(blog_id, blog_name, blog_uri):
 
 def transaction_update_blog(blog_id, blog_name, blog_uri):
   """Transaction function to update related posts of a post"""
-  b = Post.get_by_key_name('b%dp%d' % (blog_id, post_id))
+  b = Blog.get_by_key_name('b%d' % blog_id)
   b.last_updated = util.now()
   b.put()
   return b
