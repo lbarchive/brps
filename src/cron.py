@@ -18,14 +18,15 @@
 
 from datetime import timedelta
 
+from google.appengine.api import memcache
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from brps import util
+from brps import blog, util
 
 
 # In days
-POST_AGE_TO_DELETE = 7
+POST_AGE_TO_DELETE = 2
 
 
 class CleanUp(webapp.RequestHandler):
@@ -47,9 +48,43 @@ class CleanUp(webapp.RequestHandler):
       self.response.out.write('No posts need to be removed')
 
 
-application = webapp.WSGIApplication(
-    [('/admin/cleanoldposts', CleanUp),
-     ],
+class BlogCount(webapp.RequestHandler):
+  
+  def get(self):
+
+    def get_count(q):
+      r = q.fetch(1000)
+      count = 0
+      while True:
+        count += len(r)
+        if len(r) < 1000:
+          break
+        q.filter('__key__ >', r[-1])
+        r = q.fetch(1000)
+      return count
+
+    q = db.Query(blog.Blog, keys_only=True)
+    q.order('__key__')
+    total_count = get_count(q)
+
+    q = db.Query(blog.Blog, keys_only=True)
+    q.filter('accepted =', True)
+    q.order('__key__')
+    accepted_count = get_count(q)
+    
+    q = db.Query(blog.Blog, keys_only=True)
+    q.filter('accepted =', False)
+    q.order('__key__')
+    blocked_count = get_count(q)
+
+    memcache.set('blogcount', (total_count, accepted_count, blocked_count))
+    self.response.out.write('Total: %d\nAccepted: %d\nBlocked: %d' % (total_count, accepted_count, blocked_count))
+
+
+application = webapp.WSGIApplication([
+    ('/admin/blogcount', BlogCount),
+    ('/admin/cleanoldposts', CleanUp),
+    ],
     debug=True)
 
 

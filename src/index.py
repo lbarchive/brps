@@ -67,14 +67,12 @@ class StatsPage(webapp.RequestHandler):
 
   def get(self):
     """Get method handler"""
-    db_blog_count = memcache.get('db_blog_count')
-    if db_blog_count is None:
-      blog_stat = stats.KindStat.all().filter('kind_name =', 'Blog').get()
-      if blog_stat is None:
-        db_blog_count = 'Unavailable'
-      else:
-        db_blog_count = blog_stat.count
-      memcache.set('db_blog_count', db_blog_count, 3600)
+    blogcount = memcache.get('blogcount')
+    if blogcount is None:
+      total_count, accepted_count, blocked_count = 1, 0, 0
+    else:
+      total_count, accepted_count, blocked_count = blogcount
+    
     db_post_count = memcache.get('db_post_count')
     if db_post_count is None:
       post_stat = stats.KindStat.all().filter('kind_name =', 'Post').get()
@@ -82,14 +80,18 @@ class StatsPage(webapp.RequestHandler):
         db_post_count = 'Unavailable'
       else:
         db_post_count = post_stat.count
-      memcache.set('db_post_count', db_post_count, 3600)
-      
+      memcache.set('db_post_count', db_post_count, 3600 * 3)
+     
     template_values = {
       'completed_requests': Simple24.get_count('completed_requests'),
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'active_blogs_count': Simple24.get_current_hour_count('active_blogs'),
-      'db_blog_count': db_blog_count,
+      'total_count': total_count,
+      'accepted_count': accepted_count,
+      'blocked_count': blocked_count,
+      'accepted_percentage': 100.0 * accepted_count / total_count,
+      'blocked_percentage': 100.0 * blocked_count / total_count,
       'db_post_count': db_post_count,
       'before_head_end': config.before_head_end,
       'after_footer': config.after_footer,
@@ -107,7 +109,7 @@ class RedirectToStatsPage(webapp.RequestHandler):
 
   def get(self):
     """Get method handler"""
-    self.redirect("/stats")
+    self.redirect("http://brps.appspot.com/stats")
 
 
 class GetPage(webapp.RequestHandler):
@@ -212,7 +214,7 @@ is encountering a small problem... will retry in a few seconds...', callback)
 
 application = webapp.WSGIApplication(
     [('/', HomePage),
-     ('/stats', StatsPage),
+     ('/stats/?', StatsPage),
      ('/stats.*', RedirectToStatsPage),
      ('/get', GetPage),
      ],

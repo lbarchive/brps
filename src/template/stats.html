@@ -14,7 +14,9 @@
 <div id="content">
 <h2>Statistics</h2>
 <p>
-Blog entity count: {{ db_blog_count }}<br/>
+Blog entity: {{ total_count }}<br/>
+&nbsp;&nbsp;Accepted: {{ accepted_count }} ({{ accepted_percentage|floatformat:2 }}%)<br/>
+&nbsp;&nbsp;Blocked: {{ blocked_count }} ({{ blocked_percentage|floatformat:2 }}%)<br/>
 Post entity count: {{ db_post_count }}<br/>
 Active blog count: {{ active_blogs_count }} (Resets hourly)<br/>
 Completed Requests: {{ completed_requests }} (Last 24 Hours)

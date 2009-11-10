@@ -27,6 +27,14 @@ handlers:
   static_files: brps.js
   upload: brps.js
 
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /admin/blogcount
+  script: cron.py
+  login: admin
+
 - url: /admin/cleanoldposts
   script: cron.py
   login: admin
