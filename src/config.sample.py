@@ -5,6 +5,9 @@
 # Settings
 ##########
 
+DB_WRITE = True
+DB_BLOG_WRITE = True
+DB_POST_WRITE = True
 
 ##########
 # Template

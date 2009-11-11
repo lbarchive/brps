@@ -29,6 +29,7 @@ from google.appengine.ext import db
 
 from brps import util
 from brps.util import json_str_sanitize
+import config
 
 
 # Blog cache time in seconds
@@ -39,6 +40,12 @@ UPDATE_INTERVAL = 86400 * 30
 
 BASE_API_URI = 'http://www.blogger.com/feeds/'
 BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/default?v=2&alt=json&max-results=0'
+
+
+class DbBlogReadOnly(Exception):
+
+  pass
+
 
 class Blog(db.Model):
   """Blog data model"""
@@ -91,8 +98,17 @@ def get(blog_id):
   return None
 
 
+def can_write():
+  '''A helper function to ensure DB is not readonly'''
+  if config.DB_WRITE and config.DB_BLOG_WRITE:
+    return
+  raise DbBlogReadOnly()
+
+
 def add(blog_id):
   """Adds new blog to db"""
+  can_write()
+
   logging.debug('Adding blog %d' % blog_id)
   key_name = 'b%d' % blog_id
   f = fetch(BLOG_POSTS_FEED % blog_id)
@@ -106,6 +122,8 @@ def add(blog_id):
 
 def reviewed(blog_id):
   '''Mark a blog as reviewed'''
+  can_write()
+
   b = get(blog_id)
   if not b:
     return None
@@ -119,6 +137,8 @@ def reviewed(blog_id):
 
 def accept(blog_id):
   '''Mark a blog as accepted'''
+  can_write()
+
   b = get(blog_id)
   if not b:
     return None
@@ -132,6 +152,8 @@ def accept(blog_id):
 
 def block(blog_id):
   '''Mark a blog as blocked'''
+  can_write()
+
   b = get(blog_id)
   if not b:
     return None
@@ -145,6 +167,8 @@ def block(blog_id):
 
 def transaction_add_blog(blog_id, blog_name, blog_uri):
   """Transaction function to add a new blog"""
+  can_write()
+
   b = Blog(key_name='b%d' % blog_id)
   b.blog_id = blog_id
   b.name = blog_name
@@ -156,6 +180,8 @@ def transaction_add_blog(blog_id, blog_name, blog_uri):
 
 def transaction_update_blog(blog_id, blog_name, blog_uri):
   """Transaction function to update related posts of a post"""
+  can_write()
+
   b = Blog.get_by_key_name('b%d' % blog_id)
   b.last_updated = util.now()
   b.put()

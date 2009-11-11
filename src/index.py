@@ -141,6 +141,9 @@ a mistake, please contact the author of BRPS.', callback)
         max_results = 1
       elif max_results > post.MAX_POSTS:
         max_results = post.MAX_POSTS
+    except blog.DbBlogReadOnly:
+      json_error(self.response, 6, 'BRPS is under maintenance, blog information is readonly right now.', callback)
+      return
     except ValueError:
       json_error(self.response, 1, 'Missing Ids', callback)
       return

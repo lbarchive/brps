@@ -85,6 +85,7 @@ def json_error(response, code, msg, callback):
   # 3 - Server is processing, try again
   # 4 - Blocked Blog
   # 5 - Private blog is not supported
+  # 6 - Datastore is Readonly
   # 99 - Unknown problem
   # TODO sends 500
   """
