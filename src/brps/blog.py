@@ -39,7 +39,7 @@ UPDATE_INTERVAL = 86400 * 30
 
 
 BASE_API_URI = 'http://www.blogger.com/feeds/'
-BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/default?v=2&alt=json&max-results=0'
+BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/summary?v=2&alt=json&max-results=%d'
 
 
 class DbBlogReadOnly(Exception):
@@ -57,9 +57,9 @@ class Blog(db.Model):
   accepted = db.BooleanProperty(default=None)
 
 
-def get_blog_name_uri(blog_id):
+def get_blog_name_uri(blog_id, max_results=0):
 
-  f = fetch(BLOG_POSTS_FEED % blog_id)
+  f = fetch(BLOG_POSTS_FEED % (blog_id, max_results))
   if f.status_code == 200:
     p_json = json.loads(json_str_sanitize(f.content))
     blog_name = p_json['feed']['title']['$t'].strip()
@@ -67,7 +67,10 @@ def get_blog_name_uri(blog_id):
     for link in p_json['feed']['link']:
       if link['rel'] == 'alternate' and link['type'] == 'text/html':
         blog_uri = link['href']
-        return (blog_name, blog_uri)
+        if max_results:
+          return (blog_name, blog_uri, len(p_json['feed']['entry']))
+        else:
+          return (blog_name, blog_uri, 0)
   logging.warning('Unable to retrieve blog name and uri: %s' % blog_id)
   return None
 
@@ -111,10 +114,10 @@ def add(blog_id):
 
   logging.debug('Adding blog %d' % blog_id)
   key_name = 'b%d' % blog_id
-  f = fetch(BLOG_POSTS_FEED % blog_id)
-  b_nu = get_blog_name_uri(blog_id)
+  b_nu = get_blog_name_uri(blog_id, config.BLOG_MIN_POSTS)
   if b_nu:
-    b = db.run_in_transaction(transaction_add_blog, blog_id, b_nu[0], b_nu[1])
+    blocked = True if b_nu[2] < config.BLOG_MIN_POSTS else False
+    b = db.run_in_transaction(transaction_add_blog, blog_id, b_nu[0], b_nu[1], blocked)
     memcache.set(key_name, b, BLOG_CACHE_TIME)
     return b
   return None
@@ -165,7 +168,7 @@ def block(blog_id):
   memcache.set(key_name, b)
 
 
-def transaction_add_blog(blog_id, blog_name, blog_uri):
+def transaction_add_blog(blog_id, blog_name, blog_uri, blocked=False):
   """Transaction function to add a new blog"""
   can_write()
 
@@ -174,6 +177,8 @@ def transaction_add_blog(blog_id, blog_name, blog_uri):
   b.name = blog_name
   b.uri = blog_uri
   b.last_updated = util.now()
+  if blocked:
+    b.accepted = False
   b.put()
   return b
 

@@ -9,6 +9,8 @@ DB_WRITE = True
 DB_BLOG_WRITE = True
 DB_POST_WRITE = True
 
+BLOG_MIN_POSTS = 20
+
 ##########
 # Template
 ##########
