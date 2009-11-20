@@ -1,8 +1,8 @@
 cron:
-- description: remove old posts
-  url: /admin/cleanoldposts
-  schedule: every 30 minutes
+- description: defer cleaning up task
+  url: /admin/defer_cleanup
+  schedule: every 12 hours
 
 - description: recount blog numbers
   url: /admin/blogcount
-  schedule: every 3 hours
+  schedule: every 24 hours

@@ -19,7 +19,9 @@
 from datetime import timedelta
 
 from google.appengine.api import memcache
+from google.appengine.api.labs.taskqueue import TaskAlreadyExistsError
 from google.appengine.ext import db, webapp
+from google.appengine.ext import deferred
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from brps import blog, util
@@ -33,19 +35,12 @@ class CleanUp(webapp.RequestHandler):
   
   def get(self):
 
-    q = db.GqlQuery("SELECT __key__ FROM Post WHERE last_updated < :1",
-        util.now() + timedelta(days=-1 * POST_AGE_TO_DELETE))
-    count = q.count()
-    if count:
-      # 2009-05-27T08:06:58+0800
-      # BadRequestError: cannot delete more than 500 entities in a single call
-      if count > 100:
-        count = 100
-      self.response.out.write('Trying to delete %d posts...' % count)
-      db.delete(q.fetch(count))
-      self.response.out.write('deleted succesfully.')
-    else:
-      self.response.out.write('No posts need to be removed')
+    try:
+      deferred.defer(util.clean_old_posts, POST_AGE_TO_DELETE)
+      self.response.out.write('cleanoldposts: Deferred.')
+    except TaskAlreadyExistsError:
+      self.response.out.write('cleanoldposts: Already deferred.')
+      pass
 
 
 class BlogCount(webapp.RequestHandler):
@@ -83,7 +78,7 @@ class BlogCount(webapp.RequestHandler):
 
 application = webapp.WSGIApplication([
     ('/admin/blogcount', BlogCount),
-    ('/admin/cleanoldposts', CleanUp),
+    ('/admin/defer_cleanup', CleanUp),
     ],
     debug=True)
 

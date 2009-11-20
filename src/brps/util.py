@@ -22,7 +22,10 @@ import base64
 import datetime
 import logging
 
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch 
+from google.appengine.ext import db
+from google.appengine.ext import deferred
 
 import simplejson as json
 
@@ -102,3 +105,35 @@ def json_str_sanitize(json):
   for ctrl, rep in CTRLCHR:
     json = json.replace(ctrl, rep)
   return json
+
+
+def clean_old_posts(POST_AGE_TO_DELETE):
+  '''Clean 100 posts and defer itself to clean up to 10000 posts'''
+
+  del_count = memcache.get('post_del_count')
+  if del_count is None:
+    del_count = 0
+  elif del_count >= 10000:
+    logging.debug('clean_old_posts: has cleaned up 10000 posts')
+
+  q = db.GqlQuery("SELECT __key__ FROM Post WHERE last_updated < :1",
+      now() + datetime.timedelta(days=-1 * POST_AGE_TO_DELETE))
+  count = q.count()
+  if count:
+    # 2009-05-27T08:06:58+0800
+    # BadRequestError: cannot delete more than 500 entities in a single call
+    if count > 100:
+      count = 100
+    db.delete(q.fetch(count))
+  else:
+    logging.debug('clean_old_posts: no more posts to clean up')
+    return
+  del_count += count
+  memcache.set('post_del_count', del_count, 3600 * 12)
+  logging.debug('clean_old_posts: %d deletes in total' % del_count)
+  if del_count < 10000:
+    # Don't run too frequent
+    deferred.defer(clean_old_posts, POST_AGE_TO_DELETE, _countdown=60)
+    logging.debug('clean_old_posts: redeferred')
+  else:
+    logging.debug('clean_old_posts: has cleaned up 10000 posts')
