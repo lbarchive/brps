@@ -215,6 +215,10 @@ is processing for this post... will retry in a few seconds...', callback)
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 is encountering a small problem... will retry in a few seconds...', callback)
 
+  def head(self):
+    pass
+
+
 application = webapp.WSGIApplication(
     [('/', HomePage),
      ('/stats/?', StatsPage),

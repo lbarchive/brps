@@ -115,6 +115,7 @@ def clean_old_posts(POST_AGE_TO_DELETE):
     del_count = 0
   elif del_count >= 10000:
     logging.debug('clean_old_posts: has cleaned up 10000 posts')
+    return
 
   q = db.GqlQuery("SELECT __key__ FROM Post WHERE last_updated < :1",
       now() + datetime.timedelta(days=-1 * POST_AGE_TO_DELETE))
