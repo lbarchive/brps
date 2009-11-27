@@ -136,5 +136,7 @@ def clean_old_posts(POST_AGE_TO_DELETE):
     # Don't run too frequent
     deferred.defer(clean_old_posts, POST_AGE_TO_DELETE, _countdown=60)
     logging.debug('clean_old_posts: redeferred')
+  elif count < 100:
+    logging.debug('clean_old_posts: no more posts to clean up')
   else:
     logging.debug('clean_old_posts: has cleaned up 10000 posts')
