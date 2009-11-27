@@ -42,9 +42,7 @@ class AdminPage(webapp.RequestHandler):
   def get(self):
     """Get method handler"""
     template_values = {
-      'before_head_end': config.before_head_end,
-      'after_footer': config.after_footer,
-      'before_body_end': config.before_body_end,
+      'config': config,
       }
     path = os.path.join(os.path.dirname(__file__), 'template/admin.html')
     self.response.out.write(template.render(path, template_values))

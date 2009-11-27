@@ -22,7 +22,7 @@ import logging
 import sets
 import simplejson as json
 import urllib
-
+import md5
 from google.appengine.api import memcache
 from google.appengine.api.urlfetch import fetch
 from google.appengine.ext import db
@@ -43,6 +43,11 @@ BLOG_POSTS_FEED = BASE_API_URI + '%s/posts/summary?v=2&alt=json&max-results=%d'
 
 
 class DbBlogReadOnly(Exception):
+
+  pass
+
+
+class InvalidBlogKeyError(Exception):
 
   pass
 
@@ -75,7 +80,17 @@ def get_blog_name_uri(blog_id, max_results=0):
   return None
 
 
-def get(blog_id):
+def get_blog_key(blog_id):
+  blog_id = int(blog_id)
+  key = memcache.get('k%d' % blog_id)
+  if key:
+    return key
+  key = md5.md5('%d%s' % (blog_id, config.KEY_SALT)).hexdigest()[:8]
+  memcache.set('k%d' % blog_id, key, 3600)
+  return key
+
+
+def get(blog_id, key):
   """Returns blog from memcache or datastore
 
   This method also updates if data is too old"""
@@ -86,6 +101,8 @@ def get(blog_id):
     if not b:
       b = Blog.get_by_key_name(key_name)
       if not b:
+        if key != get_blog_key(blog_id):
+          raise InvalidBlogKeyError('The key is invalid.')
         return add(blog_id)
       memcache.add(key_name, b, BLOG_CACHE_TIME)
     # Check if need to update

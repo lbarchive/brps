@@ -49,6 +49,20 @@ function BRPS_render_widget_title() {
 
 function BRPS_get() {
   var $ = jQuery;
+  // Get the key
+  if ($('script[src*=brps]').length != 1) {
+    $('#related_posts').empty('<p>Could not find the possible script tags</p>');
+    return
+    }
+  var src = $('script[src*=brps]')[0].src;
+  var m = src.match(/.*brps\.js\?key=(\w{8})/);
+  if (m == null) {
+    $('#related_posts').html('<p style="color:#f00;">Could not find the key for using BRPS, you may be using old installation code, please go to <a href="' + host + '">BRPS</a> for getting the key.</p>');
+    return
+    }
+  var key = m[1];
+  var host = src.substring(0, src.indexOf('brps.js'));
+
   var _brps_options = window.brps_options;
   // Get Blog ID
   var link = $($("link[rel='EditURI']")[0]).attr('href');
@@ -57,7 +71,7 @@ function BRPS_get() {
   // Get Post ID
   var links = $("link[rel='alternate']");
   var post_id = '';
-  for (var i=0; i < links.length; i++) {
+  for (var i=0; i<links.length; i++) {
     m = /.*\/feeds\/(\d+)\/comments\/default/.exec($(links[i]).attr('href'))
     if (m != null)
       if (m.length == 2) {
@@ -72,7 +86,7 @@ function BRPS_get() {
     max_results = (_brps_options && _brps_options.max_results)
         ? '&max_results=' + _brps_options.max_results.toString()
         : '';
-    $.getJSON("http://brps.appspot.com/get?blog=" + blog_id + "&post=" + post_id + max_results + "&callback=?",
+    $.getJSON(host + "get?blog=" + blog_id + "&post=" + post_id + "&key=" + key + max_results + "&callback=?",
         function(data){
 	    	  var $ = jQuery;
           var _brps_options = window.brps_options;

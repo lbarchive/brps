@@ -17,6 +17,7 @@
 from datetime import timedelta
 import simplejson as json
 import logging
+import md5
 import os
 
 from google.appengine.api import memcache
@@ -41,9 +42,7 @@ class HomePage(webapp.RequestHandler):
   def get(self):
     """Get method handler"""
     template_values = {
-      'before_head_end': config.before_head_end,
-      'after_footer': config.after_footer,
-      'before_body_end': config.before_body_end,
+      'config': config,
       }
     path = os.path.join(os.path.dirname(__file__), 'template/home.html')
     self.response.out.write(template.render(path, template_values))
@@ -73,6 +72,7 @@ class StatsPage(webapp.RequestHandler):
       memcache.set('db_post_count', db_post_count, 3600 * 3)
      
     template_values = {
+      'config': config,
       'completed_requests': Simple24.get_count('completed_requests'),
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
@@ -83,9 +83,6 @@ class StatsPage(webapp.RequestHandler):
       'accepted_percentage': 100.0 * accepted_count / total_count,
       'blocked_percentage': 100.0 * blocked_count / total_count,
       'db_post_count': db_post_count,
-      'before_head_end': config.before_head_end,
-      'after_footer': config.after_footer,
-      'before_body_end': config.before_body_end,
       }
     path = os.path.join(os.path.dirname(__file__), 'template/stats.html')
     self.response.out.write(template.render(path, template_values))
@@ -95,22 +92,21 @@ class StatsPage(webapp.RequestHandler):
 
 
 class RedirectToStatsPage(webapp.RequestHandler):
-  """Redirects to Statistics Page"""
-
+  # Redirects to Statistics Page
   def get(self):
-    """Get method handler"""
+    
     self.redirect("http://brps.appspot.com/stats")
 
 
 class GetPage(webapp.RequestHandler):
-  """Serves relates posts"""
-
+  # Serves relates posts
   def get(self):
-    """Get method handler"""
+    
     callback = self.request.get('callback')
     try:
       blog_id = int(self.request.get('blog'))
-      b = blog.get(blog_id)
+      key = self.request.get('key', '')
+      b = blog.get(blog_id, key)
       if b is None:
         json_error(self.response, 3, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
@@ -125,6 +121,12 @@ will retry in a few seconds...', callback)
 If you are the blog owner and believe this blocking is \
 a mistake, please contact the author of BRPS.', callback)
         return
+      if not b.accepted:
+        # Need to check the key
+        if key and key != blog.get_blog_key():
+          raise blog.InvalidBlogKeyError('The key is not valid.')
+        else:
+          raise blog.InvalidBlogKeyError('The key is not supplied.')
       post_id = int(self.request.get('post'))
       max_results = int(self.request.get('max_results', post.MAX_POSTS))
       if max_results < 1:
@@ -132,7 +134,13 @@ a mistake, please contact the author of BRPS.', callback)
       elif max_results > post.MAX_POSTS:
         max_results = post.MAX_POSTS
     except blog.DbBlogReadOnly:
-      json_error(self.response, 6, 'BRPS is under maintenance, blog information is readonly right now.', callback)
+      json_error(self.response, 6, 'BRPS is under maintenance, blog information\
+ is readonly right now.', callback)
+      return
+    except blog.InvalidBlogKeyError, e:
+      json_error(self.response, 99, e.message + ' Please go to <a \
+href="http://brps.appspot.com/">BRPS</a> to obtain one. If you are reading \
+this, please relay the message to the owner of this blog.', callback)
       return
     except ValueError:
       json_error(self.response, 1, 'Missing Ids', callback)
