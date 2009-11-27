@@ -123,10 +123,10 @@ a mistake, please contact the author of BRPS.', callback)
         return
       if not b.accepted:
         # Need to check the key
-        if key and key != blog.get_blog_key():
+        logging.debug(key)
+        logging.debug(blog.get_blog_key(blog_id))
+        if key and key != blog.get_blog_key(blog_id):
           raise blog.InvalidBlogKeyError('The key is not valid.')
-        else:
-          raise blog.InvalidBlogKeyError('The key is not supplied.')
       post_id = int(self.request.get('post'))
       max_results = int(self.request.get('max_results', post.MAX_POSTS))
       if max_results < 1:

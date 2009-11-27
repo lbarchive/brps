@@ -56,11 +56,9 @@ function BRPS_get() {
     }
   var src = $('script[src*=brps]')[0].src;
   var m = src.match(/.*brps\.js\?key=(\w{8})/);
-  if (m == null) {
-    $('#related_posts').html('<p style="color:#f00;">Could not find the key for using BRPS, you may be using old installation code, please go to <a href="' + host + '">BRPS</a> for getting the key.</p>');
-    return
-    }
-  var key = m[1];
+  var key='';
+  if (m != null)
+    key = m[1];
   var host = src.substring(0, src.indexOf('brps.js'));
 
   var _brps_options = window.brps_options;

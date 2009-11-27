@@ -90,7 +90,7 @@ def get_blog_key(blog_id):
   return key
 
 
-def get(blog_id, key):
+def get(blog_id, key=''):
   """Returns blog from memcache or datastore
 
   This method also updates if data is too old"""

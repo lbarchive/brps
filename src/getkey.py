@@ -19,7 +19,7 @@ import os
 import re
 
 from google.appengine.api import memcache
-from google.appengine.api.urlfetch import fetch
+from google.appengine.api.urlfetch import fetch, InvalidURLError
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -55,18 +55,21 @@ class GetKeyPage(webapp.RequestHandler):
       if key:
         template_values['key'] = key
       else:
-        f = fetch(blog_url)
-        if f.status_code == 200:
-          m = RE_BLOG_ID.search(f.content)
-          if m:
-            blog_id = m.group(1)
-            key = blog.get_blog_key(blog_id)
-            memcache.set('k%s' % blog_url, key, 3600)
+        try:
+          f = fetch(blog_url)
+          if f.status_code == 200:
+            m = RE_BLOG_ID.search(f.content)
+            if m:
+              blog_id = m.group(1)
+              key = blog.get_blog_key(blog_id)
+              memcache.set('k%s' % blog_url, key, 3600)
+            else:
+              template_values['error'] = 'Can not find blog ID, please ask for <a href="http://groups.google.com/group/blogger-related-posts-service">help</a> with your blog address!'
           else:
-            template_values['error'] = 'Can not find blog ID, please ask for <a href="http://groups.google.com/group/blogger-related-posts-service">help</a> with your blog address!'
-        else:
-          template_values['error'] = 'Can not access to your blog!'
-
+            template_values['error'] = 'Can not access to your blog!'
+        except InvalidURLError:
+          template_values['blog_url'] = ''
+          template_values['error'] = '<tt>%s</tt> is not a valid URL!' % blog_url
 
     path = os.path.join(os.path.dirname(__file__), 'template/getkey.html')
     self.response.out.write(template.render(path, template_values))
