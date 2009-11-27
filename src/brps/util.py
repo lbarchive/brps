@@ -130,7 +130,7 @@ def clean_old_posts(POST_AGE_TO_DELETE):
     logging.debug('clean_old_posts: no more posts to clean up')
     return
   del_count += count
-  memcache.set('post_del_count', del_count, 3600 * 12)
+  memcache.set('post_del_count', del_count, 3600 * 1)
   logging.debug('clean_old_posts: %d deletes in total' % del_count)
   if del_count < 10000:
     # Don't run too frequent

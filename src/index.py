@@ -14,11 +14,6 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-"""Main file"""
-
-
 from datetime import timedelta
 import simplejson as json
 import logging
@@ -32,12 +27,7 @@ from google.appengine.ext.db import stats
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.runtime.apiproxy_errors import ApplicationError, CapabilityDisabledError
-try:
-  # When deployed
-  from google.appengine.runtime import DeadlineExceededError
-except ImportError:
-  # In the development server
-  from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
+from google.appengine.runtime import DeadlineExceededError
 
 import config
 from brps import blog, post, util
@@ -229,7 +219,8 @@ application = webapp.WSGIApplication(
 
 
 def main():
-  """Main function"""
+  # Main function
+  webapp.template.register_template_library('humanize')
   run_wsgi_app(application)
 
 
