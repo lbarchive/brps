@@ -14,8 +14,6 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from datetime import timedelta
-import simplejson as json
 import logging
 import md5
 import os
@@ -32,15 +30,15 @@ from google.appengine.runtime import DeadlineExceededError
 
 import config
 from brps import blog, post, util
-from brps.util import json_error, json_str_sanitize, send_json
+from brps.util import json_error, send_json
 from brps.post import PrivateBlogError
 import Simple24
 
 
 class HomePage(webapp.RequestHandler):
-  """HomePage handler"""
+  
   def get(self):
-    """Get method handler"""
+    
     template_values = {
       'config': config,
       }
@@ -52,10 +50,9 @@ class HomePage(webapp.RequestHandler):
 
 
 class StatsPage(webapp.RequestHandler):
-  """Statistics Page"""
 
   def get(self):
-    """Get method handler"""
+    
     blogcount = memcache.get('blogcount')
     if blogcount is None:
       total_count, accepted_count, blocked_count = 1, 0, 0
@@ -91,13 +88,6 @@ class StatsPage(webapp.RequestHandler):
     pass
 
 
-class RedirectToStatsPage(webapp.RequestHandler):
-  # Redirects to Statistics Page
-  def get(self):
-    
-    self.redirect("http://brps.appspot.com/stats")
-
-
 class GetPage(webapp.RequestHandler):
   # Serves relates posts
   def get(self):
@@ -123,8 +113,6 @@ a mistake, please contact the author of BRPS.', callback)
         return
       if not b.accepted:
         # Need to check the key
-        logging.debug(key)
-        logging.debug(blog.get_blog_key(blog_id))
         if key:
           if key != blog.get_blog_key(blog_id):
             raise blog.InvalidBlogKeyError('The key is not valid.')
@@ -223,7 +211,6 @@ is encountering a small problem... will retry in a few seconds...', callback)
 application = webapp.WSGIApplication(
     [('/', HomePage),
      ('/stats/?', StatsPage),
-     ('/stats.*', RedirectToStatsPage),
      ('/get', GetPage),
      ],
     debug=True)

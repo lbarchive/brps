@@ -70,7 +70,7 @@ class Post(db.Model):
     if isinstance(new_relates, (str, unicode)):
       self.relates = new_relates
     else:
-      self.relates = db.Text(json.dumps(new_relates), encoding='latin-1')
+      self.relates = db.Text(json.dumps(new_relates, separators=(',', ':')), encoding='latin-1')
 
   _relates_ = property(_get_relates, _set_relates)
 
@@ -215,6 +215,11 @@ def get_relates(blog_id, post_id, labels):
     _entries.sort()
     _entries.reverse()
     _entries = _entries[:MAX_POSTS]
+    # XXX Truncate the length of scort, simplejson can not serialize Decimal.
+    # This is not a best way because score becomes str, but the easist to get
+    # it around. 1/20 = 0.05, only need two digits. Should have 10-20% space
+    # saving
+    _entries = [('%.2f' % e[0], e[1], e[2]) for e in _entries]
     # jsonize the result
     entries_json = {'entry': [dict(zip(('score', 'title', 'link'), entry))\
         for entry in _entries]}

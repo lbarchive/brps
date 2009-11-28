@@ -71,7 +71,7 @@ def send_json(response, obj, callback):
   if not isinstance(obj, (str, unicode)):
     if 'code' not in obj:
       obj['code'] = 0
-    json_result = json.dumps(obj)
+    json_result = json.dumps(obj, separators=(',', ':'))
 
   response.headers['Content-Type'] = 'application/json'
   if callback:
