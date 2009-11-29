@@ -135,6 +135,12 @@ this, please relay the message to the owner of this blog.', callback)
       return
     except ValueError:
       json_error(self.response, 1, 'Missing Ids', callback)
+    except Timeout:
+      logging.warning('Timeout on b%sp%s, %s: %s' % \
+          (blog_id, post_id, type(e), e))
+      json_error(self.response, 3, '\
+<a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
+is processing for this post... will retry in a few seconds...', callback)
       return
 
     try:
