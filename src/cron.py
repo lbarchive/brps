@@ -20,6 +20,7 @@ from datetime import timedelta
 
 from google.appengine.api import memcache
 from google.appengine.api.labs.taskqueue import TaskAlreadyExistsError
+from google.appengine.api.mail import send_mail_to_admins
 from google.appengine.ext import db, webapp
 from google.appengine.ext import deferred
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -76,9 +77,32 @@ class BlogCount(webapp.RequestHandler):
     self.response.out.write('Total: %d\nAccepted: %d\nBlocked: %d' % (total_count, accepted_count, blocked_count))
 
 
+class NotifyReview(webapp.RequestHandler):
+  
+  def get(self):
+
+    query = db.Query(blog.Blog)
+    query.filter('last_reviewed =', None)
+    query.filter('accepted =', None)
+    query.order('last_reviewed')
+    count = query.count()
+
+    query = db.Query(blog.Blog)
+    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * BLOG_REVIEW_INTERVAL))
+    query.filter('accepted =', None)
+    query.order('last_reviewed')
+    count += query.count()
+
+    if count:
+      send_mail_to_admins('BRPS <noreply@brps.appspot.com>',
+          'BRPS: %d blogs waiting for reviewing' % count,
+          'BRPS: %d blogs waiting for reviewing' % count)
+          
+
 application = webapp.WSGIApplication([
     ('/admin/blogcount', BlogCount),
     ('/admin/defer_cleanup', CleanUp),
+    ('/admin/notify_review', NotifyReview),
     ],
     debug=True)
 

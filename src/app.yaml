@@ -39,6 +39,10 @@ handlers:
   script: cron.py
   login: admin
 
+- url: /admin/notify_review
+  script: cron.py
+  login: admin
+
 - url: /admin.*
   script: admin.py
   login: admin
