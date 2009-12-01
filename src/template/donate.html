@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Blogger Related Posts Service » Donate</title>
+  <link href="/css/brps.css" type="text/css" rel="stylesheet"/>
+  <link href="/favicon.ico" type="image/x-icon" rel="shortcut icon"/>
+{{ before_head_end }}
+</head>
+<body>
+<div id="wrap">
+{% include "header.html" %}
+<div id="content">
+<h2>Donate</h2>
+<h3>Notice</h3>
+<p>If you are considering donating some money, I am thankful for your thought. Please understand few things first:
+</p>
+<ul>
+  <li>Donation is NOT refundable..</li>
+  <li>Donation will NOT get your blogs accepted or unblocked.</li>
+  <li>Donation is NOT an advertisement method on BRPS. I may or may not listed your name and/or blog in this page.</li>
+  <li>Please do not be hesitate sending a mail to <a href="http://sites.google.com/site/livibetter/contact">me</a> about your donation with your name and blog. If you have multiple blogs, please pick one of your best!</li>
+  <li>Please must send me a mail! I really want to list you on this page! :-)</li>
+  <li>I will not list you if I do not have your permission.</li>
+</ul>
+
+<h3>Donate</h3>
+<p>If you do understand above, please click on the button to proceed donating:</p>
+<div style="text-align:center">
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="9600240">
+<input type="image" src="https://www.paypal.com/en_GB/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online.">
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+</div>
+{% if config.DONORS %}
+<h3>Donors</h3>
+<ul>
+{% for donor in config.DONORS reversed %}
+  <li>{% if donor.1 %}{% if donor.2 %}<a href="{{ donor.2 }}">{{ donor.1 }}</a>{% else %}{{ donor.1 }}{% endif %}{% else %}Donor{% endif %} — <span style="border-bottom: 1px dotted" title="{{ donor.0 }}">{{ donor.0|timesince }} ago</span></li>
+{% endfor %}
+</ul>
+{% endif %}
+</div>
+{% include "footer.html" %}
+</div>
+{{ before_body_end }}
+</body>
+</html>

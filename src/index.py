@@ -49,6 +49,20 @@ class HomePage(webapp.RequestHandler):
     pass
 
 
+class DonatePage(webapp.RequestHandler):
+  
+  def get(self):
+    
+    template_values = {
+      'config': config,
+      }
+    path = os.path.join(os.path.dirname(__file__), 'template/donate.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def head(self):
+    pass
+
+
 class StatsPage(webapp.RequestHandler):
 
   def get(self):
@@ -212,12 +226,12 @@ is encountering a small problem... will retry in a few seconds...', callback)
     pass
 
 
-application = webapp.WSGIApplication(
-    [('/', HomePage),
-     ('/stats/?', StatsPage),
-     ('/get', GetPage),
-     ],
-    debug=True)
+application = webapp.WSGIApplication([
+    ('/', HomePage),
+    ('/donate', DonatePage),
+    ('/stats/?', StatsPage),
+    ('/get', GetPage),
+    ], debug=config.DEBUG)
 
 
 def main():
