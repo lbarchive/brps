@@ -18,25 +18,22 @@
 
 google.load('jquery', '1.3');
 google.setOnLoadCallback(function() {
-  BRPS_init_error_indicator()
   BRPS_get();
   });
 
-// Global error indicator
-function BRPS_init_error_indicator() {
-  $("#related_posts").ajaxError(function(event, request, settings){
-    var err_msg;
-    switch(request.status) {
-      case 403:
-        err_msg = "BRPS is temporarily out of service."
-        break;
-      default:
-        err_msg = "Unknown problem to retrieve related posts!";
-      }
-    $(this).html('<p>' + err_msg + '</p>');
-    });
+function BRPS_watchdog() {
+  if (window.brps_start == undefined)
+    return
+  diff = (new Date()).valueOf() - brps_start;
+  if (diff >= 30 * 1000) {
+    $('#related_posts').empty();
+    BRPS_render_widget_title();
+    $('#related_posts').append('<p style="color:#f00">Something went wrong with BRPS server!</p>');
+    window.brps_start = undefined;
+    }
+  else
+    window.setTimeout('BRPS_watchdog()', 5000);
   }
-
 
 function BRPS_render_widget_title() {
   var $ = jQuery;
@@ -51,7 +48,7 @@ function BRPS_get() {
   var $ = jQuery;
   // Get the key
   if ($('script[src*=brps]').length != 1) {
-    $('#related_posts').empty('<p>Could not find the possible script tags</p>');
+    $('#related_posts').empty().html('<p>Could not find the possible script tags</p>');
     return
     }
   var src = $('script[src*=brps]')[0].src;
@@ -78,6 +75,9 @@ function BRPS_get() {
         }
     }
   if (blog_id != '' && post_id != '') {
+    if (window.brps_start == undefined)
+      window.setTimeout('BRPS_watchdog()', 5000);
+    window.brps_start = (new Date()).valueOf();
     $('#related_posts').empty();
     BRPS_render_widget_title();
     $('<i>Loading...</i>').appendTo('#related_posts');
@@ -86,6 +86,7 @@ function BRPS_get() {
         : '';
     $.getJSON(host + "get?blog=" + blog_id + "&post=" + post_id + "&key=" + key + max_results + "&callback=?",
         function(data){
+          window.brps_start = undefined;
 	    	  var $ = jQuery;
           var _brps_options = window.brps_options;
           $('#related_posts').empty();
