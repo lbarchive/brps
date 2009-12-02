@@ -69,7 +69,7 @@ class StatsPage(webapp.RequestHandler):
     
     blogcount = memcache.get('blogcount')
     if blogcount is None:
-      total_count, accepted_count, blocked_count = 1, 0, 0
+      total_count, accepted_count, blocked_count = None, None, None
     else:
       total_count, accepted_count, blocked_count = blogcount
     
@@ -88,13 +88,14 @@ class StatsPage(webapp.RequestHandler):
       'chart_uri': Simple24.get_chart_uri('completed_requests'),
       'chart_uri_active_blogs': Simple24.get_chart_uri('active_blogs'),
       'active_blogs_count': Simple24.get_current_hour_count('active_blogs'),
-      'total_count': total_count,
-      'accepted_count': accepted_count,
-      'blocked_count': blocked_count,
-      'accepted_percentage': 100.0 * accepted_count / total_count,
-      'blocked_percentage': 100.0 * blocked_count / total_count,
       'db_post_count': db_post_count,
       }
+    if total_count:
+      template_values['total_count'] = total_count,
+      template_values['accepted_count'] = accepted_count,
+      template_values['blocked_count'] = blocked_count,
+      template_values['accepted_percentage'] = 100.0 * accepted_count / total_count,
+      template_values['blocked_percentage'] = 100.0 * blocked_count / total_count,
     path = os.path.join(os.path.dirname(__file__), 'template/stats.html')
     self.response.out.write(template.render(path, template_values))
 
