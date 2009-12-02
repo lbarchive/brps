@@ -149,6 +149,7 @@ this, please relay the message to the owner of this blog.', callback)
       return
     except ValueError:
       json_error(self.response, 1, 'Missing Ids', callback)
+      return
     except Timeout:
       json_error(self.response, 3, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
