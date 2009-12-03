@@ -26,6 +26,7 @@ from google.appengine.ext import deferred
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from brps import blog, util
+import config
 
 
 # In days
@@ -88,16 +89,16 @@ class NotifyReview(webapp.RequestHandler):
     count = query.count()
 
     query = db.Query(blog.Blog)
-    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * BLOG_REVIEW_INTERVAL))
+    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * config.BLOG_REVIEW_INTERVAL))
     query.filter('accepted =', None)
     query.order('last_reviewed')
-    count += query.count()
+    count += len([b for b in query.fetch(10) if b.last_reviewed != None])
 
+    msg = 'BRPS: %d blogs or more are waiting for reviewing' % count
     if count:
-      send_mail_to_admins('BRPS <noreply@brps.appspot.com>',
-          'BRPS: %d blogs waiting for reviewing' % count,
-          'BRPS: %d blogs waiting for reviewing' % count)
-          
+      send_mail_to_admins(config.ADMIN_EMAIL, msg, msg)
+      self.response.out.write('Mail has sent.')
+
 
 application = webapp.WSGIApplication([
     ('/admin/blogcount', BlogCount),

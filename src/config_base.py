@@ -10,7 +10,11 @@ DB_POST_WRITE = True
 
 BLOG_MIN_POSTS = 20
 
+BLOG_REVIEW_INTERVAL = 86400 * 90
+
 KEY_SALT = 'the_salt'
+
+ADMIN_EMAIL = 'user@example.com'
 
 ##########
 # Template

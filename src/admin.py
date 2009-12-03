@@ -34,9 +34,6 @@ from brps.util import json_error, send_json
 import Simple24
 
 
-BLOG_REVIEW_INTERVAL = 86400 * 90
-
-
 class AdminPage(webapp.RequestHandler):
 
   def get(self):
@@ -59,7 +56,7 @@ class ReviewPage(webapp.RequestHandler):
     blogs = query.fetch(10)
 
     query = db.Query(blog.Blog)
-    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * BLOG_REVIEW_INTERVAL))
+    query.filter('last_reviewed <', util.now() + timedelta(seconds=-1 * config.BLOG_REVIEW_INTERVAL))
     query.filter('accepted =', None)
     query.order('last_reviewed')
     template_values = {
