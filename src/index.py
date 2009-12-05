@@ -120,7 +120,6 @@ will retry in a few seconds...', callback)
         return
       if b.accepted == False:
         # Blocked blog
-        logging.debug('Blocked blog: %d' % blog_id)
         json_error(self.response, 4, 'This blog is blocked from using \
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a>. \
 If you are the blog owner and believe this blocking is \
@@ -151,7 +150,7 @@ this, please relay the message to the owner of this blog.', callback)
     except ValueError:
       json_error(self.response, 1, 'Missing Ids', callback)
       return
-    except Timeout:
+    except (DownloadError, DeadlineExceededError, Timeout), e:
       json_error(self.response, 3, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 is processing for this post... will retry in a few seconds...', callback)
@@ -166,7 +165,7 @@ is processing for this post... will retry in a few seconds...', callback)
           key_name = 'b%dp%dl' % (blog_id, post_id)
           memcache.add(key_name, rlist, post.POST_CACHE_TIME)
       except CapabilityDisabledError:
-        logging.debug('Caught CapabilityDisabledError')
+        logging.warning('Caught CapabilityDisabledError')
         json_error(self.response, 2,
             'Unable to process, Google App Engine may be under maintenance.',
             callback)
@@ -200,7 +199,7 @@ does not support private blog.', callback)
               blogs.append(blog_id)
               memcache.set('blogs-1', blogs)
             else:
-              logging.info('Unable to fetch blog info %s, %d.' % \
+              logging.warning('Unable to fetch blog info %s, %d.' % \
                   (blog_id, f.status_code))
               json_error(self.response, 5, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
@@ -212,14 +211,10 @@ does not support private blog.', callback)
         json_error(self.response, 99, 'Unable to get related posts', callback)
     except (DownloadError, DeadlineExceededError, Timeout), e:
       # Should be a timeout, just tell client to retry in a few seconds
-      logging.warning('Timeout on b%sp%s, %s: %s' % \
-          (blog_id, post_id, type(e), e))
       json_error(self.response, 3, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 is processing for this post... will retry in a few seconds...', callback)
     except ApplicationError, e:
-      logging.error('ApplicationError on b%sp%s, %s: %s' % \
-          (blog_id, post_id, type(e), e))
       json_error(self.response, 3, '\
 <a href="http://brps.appspot.com/">Blogger Related Posts Service</a> \
 is encountering a small problem... will retry in a few seconds...', callback)

@@ -125,7 +125,6 @@ def add(blog_id):
   """Adds new blog to db"""
   can_write()
 
-  logging.debug('Adding blog %d' % blog_id)
   key_name = 'b%d' % blog_id
   b_nu = get_blog_name_uri(blog_id, config.BLOG_MIN_POSTS)
   if b_nu:
