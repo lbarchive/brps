@@ -1,17 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-<head>
-  <title>Blogger Related Posts Service</title>
-  <link href="/css/brps.css" type="text/css" rel="stylesheet"/>
-  <link href="/favicon.ico" type="image/x-icon" rel="shortcut icon"/>
-{{ before_head_end }}
-</head>
-<body>
-<div id="wrap">
-{% include "header.html" %}
-<div id="content">
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block content %}
 <h2>About</h2>
 <h3>What is this?</h3>
 <p>Blogger, a.k.a. Blogger.com, Blogspot, or Blog*Spot, has operated for many years, but the blog owners still doesn't have a easy installation <b>Related Posts</b> widget. You have to go through really nasty steps in order to install those code which you can search on Google. I finally decided to make this small project. It's not only good for blog owners, but also good for Blogger.com, it caches results that can ease server load. If you want to more about this service, please visit the <a href="http://code.google.com/p/brps/">project page</a>.</p>
@@ -21,9 +11,4 @@
 
 <h2>Sucks!</h2>
 <p>Yea... I know.</p>
-</div>
-{% include "footer.html" %}
-</div>
-{{ before_body_end }}
-</body>
-</html>
+{% endblock %}

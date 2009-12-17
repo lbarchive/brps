@@ -1,4 +1,13 @@
 <div id="footer">
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en'
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="http://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <p>This service is created by <a href="http://sites.google.com/site/livibetter/">Yu-Jie Lin</a>.</p>
 <p><i>Blogger Related Posts Service is not affiliated with <a href="http://www.blogger.com/">Blogger</a>.</i></p>
 {{ config.after_footer }}

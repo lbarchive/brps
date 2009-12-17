@@ -17,6 +17,7 @@
 import md5
 import os
 import re
+import urllib
 
 from google.appengine.api import memcache
 from google.appengine.api.urlfetch import fetch, InvalidURLError
@@ -35,22 +36,12 @@ class GetKeyPage(webapp.RequestHandler):
   
   def get(self):
     
-    template_values = {
-      'config': config,
-      }
-    path = os.path.join(os.path.dirname(__file__), 'template/getkey.html')
-    self.response.out.write(template.render(path, template_values))
-
-  def post(self):
-    
-    blog_url = self.request.get('blog_url', '')
+    blog_url = urllib.unquote(self.request.get('blog_url', ''))
     template_values = {
       'blog_url': blog_url,
       'config': config,
       }
-    if not blog_url:
-      template_values['error'] = 'You need to input your blog address!'
-    else:
+    if blog_url:
       key = memcache.get('k%s' % blog_url)
       if key:
         template_values['key'] = key
@@ -62,6 +53,7 @@ class GetKeyPage(webapp.RequestHandler):
             if m:
               blog_id = m.group(1)
               key = blog.get_blog_key(blog_id)
+              template_values['key'] = key
               memcache.set('k%s' % blog_url, key, 3600)
             else:
               template_values['error'] = 'Can not find blog ID, please ask for <a href="http://groups.google.com/group/blogger-related-posts-service">help</a> with your blog address!'
