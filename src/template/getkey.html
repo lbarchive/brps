@@ -9,9 +9,9 @@ Note that this key <tt>{{ key }}</tt> only works for <tt>{{ blog_url }}</tt>, it
 <h2>Installation Steps</h2>
 <h3>If You Have Previous Code</h3>
 <p>Go search for the following in your Blogger template</p>
-<pre>&lt;script src=&apos;http://brps.appspot.com/brps.js&apos; type=&apos;text/javascript&apos;/&gt;</pre>
+<pre class="notranslate">&lt;script src=&apos;http://brps.appspot.com/brps.js&apos; type=&apos;text/javascript&apos;/&gt;</pre>
 and make it to be
-<pre>&lt;script src=&apos;http://brps.appspot.com/brps.js<span style="color:#f00">?key={{ key }}</span>&apos; type=&apos;text/javascript&apos;/&gt;</pre>
+<pre class="notranslate">&lt;script src=&apos;http://brps.appspot.com/brps.js<span style="color:#f00">?key={{ key }}</span>&apos; type=&apos;text/javascript&apos;/&gt;</pre>
 
 <img src="/images/RelatedPostsSidebar.png" class="right" alt="Screenshot of the Widget at sidebar" title="Screenshot of the Widget at sidebar"/>
 <h3>Add a Sidebar Widget</h3>
@@ -40,7 +40,7 @@ You have to see it in action in single post, you will not see the Related Posts 
 <h3>Add a Sidebar Widget Manually</h3>
 <h4>Step 1. Add a HTML/JavaScript on your sidebar in Layout</h4>
 <h4>Step 2. Put the following code and Save it</h4>
-<pre>
+<pre class="notranslate">
 &lt;script src=&quot;http://www.google.com/jsapi&quot;/&gt;
 &lt;script src=&quot;http://brps.appspot.com/brps.js?key={{ key }}&quot; type=&quot;text/javascript&quot;/&gt;
 &lt;div id=&quot;related_posts&quot;&gt;&lt;/div&gt;
@@ -53,25 +53,25 @@ You have to see it in action in single post, you will not see the Related Posts 
 <h4>Step 1. Go to Layout/Edit HTML/Edit Template</h4>
 <h4>Step 2. BACKUP your template! Do not skip this!</h4>
 <h4>Step 3. Check Expand Widget Templates, then Find a block like:</h4>
-<pre>
+<pre class="notranslate">
 &lt;div class=&apos;post-footer-line post-footer-line-3&apos;/&gt;
   ...
 &lt;/div&gt;
 </pre>
 <h4>Step 4. Add one more line to be:</h4>
-<pre>
+<pre class="notranslate">
 &lt;div class=&apos;post-footer-line post-footer-line-3&apos;/&gt;
   ...
 &lt;/div&gt;
 &lt;div id=&apos;related_posts&apos;/&gt;
 </pre>
 <h4>Step 5. Go to the end for:</h4>
-<pre>
+<pre class="notranslate">
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
 <h4>Step 6. Add two more lines to be:</h4>
-<pre>
+<pre class="notranslate">
 &lt;script src=&apos;http://www.google.com/jsapi&apos;/&gt;
 &lt;script src=&apos;http://brps.appspot.com/brps.js?key={{ key }}&apos; type=&apos;text/javascript&apos;/&gt;
 &lt;/body&gt;
