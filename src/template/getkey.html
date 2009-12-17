@@ -2,14 +2,6 @@
 
 {% block title %}Get Key and Install{% endblock %}
 
-{% block head %}
-<script type="text/javascript">
-function getkey() {
-  window.location = window.location.protocol + '//' + window.location.host + '/getkey?blog_url=' + encodeURI(document.getElementById('blog_url').value);
-  }
-</script>
-{% endblock %}
-
 {% block content %}
 {% if key %}
 <h2>Your Key is <tt>{{ key }}</tt></h2>
