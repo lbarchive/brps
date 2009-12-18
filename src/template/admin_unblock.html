@@ -1,0 +1,16 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Unblock{% endblock %}
+
+{% block content %}
+<h2>Unblock</h2>
+<form action="/admin/unblock" method="get">
+<p style="text-align:center;color:#f00">{{ error }}</p>
+<p style="text-align:center">
+Blog address: <input type="text" size="30" name="blog_url" id="blog_url" value="{{ blog_url }}"/>
+</p>
+<p style="text-align:center">
+<input type="submit" value="Unblock"/>
+</p>
+</form>
+{% endblock %}

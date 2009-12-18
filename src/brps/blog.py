@@ -148,6 +148,7 @@ def reviewed(blog_id):
 
   key_name = 'b%d' % blog_id
   memcache.set(key_name, b)
+  return b
 
 
 def accept(blog_id):
@@ -163,6 +164,7 @@ def accept(blog_id):
 
   key_name = 'b%d' % blog_id
   memcache.set(key_name, b)
+  return b
 
 
 def block(blog_id):
@@ -178,6 +180,24 @@ def block(blog_id):
 
   key_name = 'b%d' % blog_id
   memcache.set(key_name, b)
+  return b
+
+
+def unblock(blog_id):
+  # Mark a blog as unblocked
+  can_write()
+
+  b = get(blog_id)
+  if not b:
+    return None
+
+  b.accepted = None
+  b.last_reviewed = util.now()
+  b.put()
+
+  key_name = 'b%d' % blog_id
+  memcache.set(key_name, b)
+  return b
 
 
 def transaction_add_blog(blog_id, blog_name, blog_uri, blocked=False):
