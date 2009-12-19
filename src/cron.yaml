@@ -5,8 +5,8 @@ cron:
 
 - description: recount blog numbers
   url: /admin/blogcount
-  schedule: every 24 hours
+  schedule: every day 00:00
 
 - description: notify the admin to review
   url: /admin/notify_review
-  schedule: every 24 hours
+  schedule: every day 01:00
