@@ -1,4 +1,4 @@
-google.load("jquery", "1");
+google.load("jquery", "1.3");
 
 
 // Global error indicator
@@ -32,7 +32,7 @@ function reviewed(blog_id) {
       $("a.reviewed").each(function(){
         var $ele = $(this)
         if ($ele.attr('href').indexOf("('" + json.blog_id + "')") >= 0) {
-          $ele.replaceWith("Reviewed");
+          $ele.replaceWith("<span>Reviewed</span>");
           $('#messages').html();
           return false;
           }
@@ -56,7 +56,7 @@ function accept(blog_id) {
       $("a.accept").each(function(){
         var $ele = $(this)
         if ($ele.attr('href').indexOf("('" + json.blog_id + "')") >= 0) {
-          $ele.replaceWith("Accepted");
+          $ele.replaceWith("<span>Accepted</span>");
           $('#messages').html();
           return false;
           }
@@ -80,7 +80,7 @@ function block(blog_id) {
       $("a.block").each(function(){
         var $ele = $(this)
         if ($ele.attr('href').indexOf("('" + json.blog_id + "')") >= 0) {
-          $ele.replaceWith("Blocked");
+          $ele.replaceWith("<span>Blocked</span>");
           $('#messages').html();
           return false;
           }
