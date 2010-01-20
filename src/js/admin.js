@@ -1,4 +1,4 @@
-google.load("jquery", "1.3");
+google.load("jquery", "1");
 
 
 // Global error indicator
