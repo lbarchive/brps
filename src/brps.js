@@ -47,11 +47,11 @@ function BRPS_render_widget_title() {
 function BRPS_get() {
   var $ = jQuery;
   // Get the key
-  if ($('script[src*=brps]').length != 1) {
-    $('#related_posts').empty().html('<p>Could not find the possible script tags</p>');
+  if ($("script[src*='brps.appspot.com/brps.js']").length != 1) {
+    $('#related_posts').empty().html('<p>Could not find the possible script tags, you can only include BRPS client brps.js script once.</p>');
     return
     }
-  var src = $('script[src*=brps]')[0].src;
+  var src = $("script[src*='brps.appspot.com/brps.js']")[0].src;
   var m = src.match(/.*brps\.js\?key=(\w{8})/);
   var key='';
   if (m != null)
