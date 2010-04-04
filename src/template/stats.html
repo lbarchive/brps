@@ -9,10 +9,12 @@
 Blog entity: {{ total_count|intcomma }}<br/>
 &nbsp;&nbsp;Accepted: {{ accepted_count|intcomma }} ({{ accepted_percentage|floatformat:2 }}%)<br/>
 &nbsp;&nbsp;Blocked: {{ blocked_count|intcomma }} ({{ blocked_percentage|floatformat:2 }}%)<br/>
+&nbsp;&nbsp;In Review: {{ review_count|intcomma }} ({{ review_percentage|floatformat:2 }}%)<br/>
 {% else %}
 Blog entity: Unavailable<br/>
 &nbsp;&nbsp;Accepted: Unavailable<br/>
 &nbsp;&nbsp;Blocked: Unavailable<br/>
+&nbsp;&nbsp;In Review: Unavailable<br/>
 {% endif %}
 Post entity count: {{ db_post_count|intcomma }}<br/>
 Active blog count: {{ active_blogs_count|intcomma }} (Resets hourly)<br/>

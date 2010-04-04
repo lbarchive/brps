@@ -49,32 +49,7 @@ class BlogCount(webapp.RequestHandler):
   
   def get(self):
 
-    def get_count(q):
-      r = q.fetch(1000)
-      count = 0
-      while True:
-        count += len(r)
-        if len(r) < 1000:
-          break
-        q.filter('__key__ >', r[-1])
-        r = q.fetch(1000)
-      return count
-
-    q = db.Query(blog.Blog, keys_only=True)
-    q.order('__key__')
-    total_count = get_count(q)
-
-    q = db.Query(blog.Blog, keys_only=True)
-    q.filter('accepted =', True)
-    q.order('__key__')
-    accepted_count = get_count(q)
-    
-    q = db.Query(blog.Blog, keys_only=True)
-    q.filter('accepted =', False)
-    q.order('__key__')
-    blocked_count = get_count(q)
-
-    memcache.set('blogcount', (total_count, accepted_count, blocked_count))
+    total_count, accepted_count, blocked_count = util.blog_count()
     self.response.out.write('Total: %d\nAccepted: %d\nBlocked: %d' % (total_count, accepted_count, blocked_count))
 
 

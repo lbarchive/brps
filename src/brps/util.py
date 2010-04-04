@@ -1,5 +1,5 @@
 # LasTweet lists last tweets to friends
-# Copyright (C) 2008  Yu-Jie Lin
+# Copyright (C) 2008, 2009  Yu-Jie Lin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,3 +140,35 @@ def clean_old_posts(POST_AGE_TO_DELETE):
     logging.debug('clean_old_posts: redeferred')
   else:
     logging.debug('clean_old_posts: has cleaned up 10000 posts')
+
+def blog_count():
+
+  from brps import blog
+
+  def get_count(q):
+    r = q.fetch(1000)
+    count = 0
+    while True:
+      count += len(r)
+      if len(r) < 1000:
+        break
+      q.filter('__key__ >', r[-1])
+      r = q.fetch(1000)
+    return count
+
+  q = db.Query(blog.Blog, keys_only=True)
+  q.order('__key__')
+  total_count = get_count(q)
+
+  q = db.Query(blog.Blog, keys_only=True)
+  q.filter('accepted =', True)
+  q.order('__key__')
+  accepted_count = get_count(q)
+  
+  q = db.Query(blog.Blog, keys_only=True)
+  q.filter('accepted =', False)
+  q.order('__key__')
+  blocked_count = get_count(q)
+
+  memcache.set('blogcount', (total_count, accepted_count, blocked_count))
+  return (total_count, accepted_count, blocked_count)

@@ -1,6 +1,6 @@
 # Blogger.com Related Posts Service (http://brps.appspot.com/)
 #
-# Copyright (C) 2008, 2009  Yu-Jie Lin
+# Copyright (C) 2008, 2009, 2010  Yu-Jie Lin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,10 @@ import os
 
 from google.appengine.api import memcache
 from google.appengine.api.datastore_errors import Timeout
+from google.appengine.api.labs.taskqueue import TaskAlreadyExistsError
 from google.appengine.api.urlfetch import DownloadError, fetch
 from google.appengine.ext import webapp
+from google.appengine.ext import deferred
 from google.appengine.ext.db import stats
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -72,7 +74,18 @@ class StatsPage(webapp.RequestHandler):
       total_count, accepted_count, blocked_count = None, None, None
     else:
       total_count, accepted_count, blocked_count = blogcount
-    
+
+    if total_count is None:
+      try:
+        deferred.defer(util.blog_count)
+        logging.debug('blog_count: Deferred.')
+      except TaskAlreadyExistsError:
+        logging.debug('blog_count: Already deferred.')
+        pass
+      review_count = None
+    else:
+      review_count = total_count - accepted_count - blocked_count
+
     db_post_count = memcache.get('db_post_count')
     if db_post_count is None:
       post_stat = stats.KindStat.all().filter('kind_name =', 'Post').get()
@@ -96,6 +109,7 @@ class StatsPage(webapp.RequestHandler):
       template_values['blocked_count'] = blocked_count
       template_values['accepted_percentage'] = 100.0 * accepted_count / total_count
       template_values['blocked_percentage'] = 100.0 * blocked_count / total_count
+      template_values['review_percentage'] = 100.0 * review_count / total_count
     path = os.path.join(os.path.dirname(__file__), 'template/stats.html')
     self.response.out.write(template.render(path, template_values))
 
