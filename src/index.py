@@ -107,6 +107,7 @@ class StatsPage(webapp.RequestHandler):
       template_values['total_count'] = total_count
       template_values['accepted_count'] = accepted_count
       template_values['blocked_count'] = blocked_count
+      template_values['review_count'] = review_count
       template_values['accepted_percentage'] = 100.0 * accepted_count / total_count
       template_values['blocked_percentage'] = 100.0 * blocked_count / total_count
       template_values['review_percentage'] = 100.0 * review_count / total_count
