@@ -9,9 +9,9 @@ Note that this key <tt>{{ key }}</tt> only works for <tt>{{ blog_url }}</tt>, it
 <h2>Installation Steps</h2>
 <h3>If You Have Previous Code</h3>
 <p>Go search for the following in your Blogger template</p>
-<pre class="notranslate">&lt;script src=&apos;http://brps.appspot.com/brps.js&apos; type=&apos;text/javascript&apos;/&gt;</pre>
+<pre class="notranslate">&lt;script src=&quot;http://brps.appspot.com/brps.js&quot;...</pre>
 and make it to be
-<pre class="notranslate">&lt;script src=&apos;http://brps.appspot.com/brps.js<span style="color:#f00">?key={{ key }}</span>&apos; type=&apos;text/javascript&apos;/&gt;</pre>
+<pre class="notranslate">&lt;script src=&quot;http://brps.appspot.com/brps.js<span style="color:#f00">?key={{ key }}</span>&quot;...</pre>
 
 <img src="/images/RelatedPostsSidebar.png" class="right" alt="Screenshot of the Widget at sidebar" title="Screenshot of the Widget at sidebar"/>
 <h3>Add a Sidebar Widget</h3>
@@ -22,7 +22,7 @@ and make it to be
     <input type="hidden" name="widget.title" value=""/>
     <textarea name="widget.content" style="display:none;" id="widget_content" rows="5" cols="80">
   &lt;script src=&quot;http://www.google.com/jsapi&quot;&gt;&lt;/script&gt;
-  &lt;script src=&quot;http://brps.appspot.com/brps.js?key={{ key }}&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;http://brps.appspot.com/brps.js?key={{ key }}&quot;&gt;&lt;/script&gt;
   &lt;div id=&quot;related_posts&quot;&gt;&lt;/div&gt;
     </textarea>
     <input type="image" src="/images/add2blogger_lg.gif" alt="Add Related Posts Widget" title="Add Related Posts Widget"/>
@@ -41,8 +41,8 @@ You have to see it in action in single post, you will not see the Related Posts 
 <h4>Step 1. Add a HTML/JavaScript on your sidebar in Layout</h4>
 <h4>Step 2. Put the following code and Save it</h4>
 <pre class="notranslate">
-&lt;script src=&quot;http://www.google.com/jsapi&quot;/&gt;
-&lt;script src=&quot;http://brps.appspot.com/brps.js?key={{ key }}&quot; type=&quot;text/javascript&quot;/&gt;
+&lt;script src=&quot;http://www.google.com/jsapi&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;http://brps.appspot.com/brps.js?key={{ key }}&quot;&gt;&lt;/script&gt;
 &lt;div id=&quot;related_posts&quot;&gt;&lt;/div&gt;
 </pre>
 <h4>Step 3. Move the new sidebar widget to a position you like</h4>
