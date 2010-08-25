@@ -27,6 +27,10 @@ handlers:
   static_files: brps.js
   upload: brps.js
 
+- url: /gas.js
+  static_files: gas.js
+  upload: gas.js
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
