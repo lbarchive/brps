@@ -37,11 +37,17 @@ $(function() {
 
   // Count tags
   var tag_count = {};
-  $.each($(brps_gas.tag_selector), function(idx, tag) {
+  var tags = $(brps_gas.tag_selector);
+  if (tags.length == 0) {
+    $('#gas-results').append($(brps_gas.html_no_results));
+    return;
+    }
+
+  $.each(tags, function(idx, tag) {
     var tag = $(tag).text().toLowerCase();
     tag_count[tag] = ((tag in tag_count) ? tag_count[tag] : 0 ) + 1;
     });
-  var tags = [];
+  tags = [];
   $.each(tag_count, function(tag, count) {
     tags.push([tag, count]);
     });
