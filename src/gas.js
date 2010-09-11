@@ -18,7 +18,9 @@
 
 $(function() {
 
+  var MAX_RESULTS = 20;
   var MAX_TAGS = 20;
+  var RESULTS_PER_PAGE = 8;
 
   if ($('#gas-results').length != 1)
     return;
@@ -30,10 +32,11 @@ $(function() {
       html_no_results: '<span>Found no results.</span>'
       }, window.brps_gas);
 
-  if (brps_gas.limit > 8)
-    brps_gas.limit = 8;
+  if (brps_gas.limit > MAX_RESULTS)
+    brps_gas.limit = MAX_RESULTS;
+  window.brps_gas = brps_gas;
 
-  var websearch = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=' + brps_gas.limit.toString() + '&callback=?';
+  var websearch = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8' + '&callback=?';
 
   // Count tags
   var tag_count = {};
@@ -84,26 +87,56 @@ $(function() {
 
   $('#gas-results').empty().append($(brps_gas.html_loading));
 
-  $.getJSON(websearch + '&q=' + encodeURIComponent(q), function(data) {
-    var results = data.responseData.results;
+  var base_url = websearch + '&q=' + encodeURIComponent(q);
+  $.getJSON(base_url, function(data) {brps_gas_callback(data, base_url)});
+  });
+
+function brps_gas_callback(data, base_url) {
+
+  var MAX_PAGES = 5;
+  var RESULTS_PER_PAGE = 8;
+  
+  var results = data.responseData.results;
+  var cursor = data.responseData.cursor;
+  var $results;
+  
+  if (!cursor.currentPageIndex || cursor.currentPageIndex == 0) {
     $('#gas-results').empty();
-    if (results.length > 0) {
-      var $results = $('<ul/>');
-      $.each(results, function(idx, result) {
-        // Do not list same page
-        if (result.unescapedUrl == document.location.href)
-          return;
-        var $a = $('<a/>')
-            .attr('href', result.unescapedUrl)
-            .text($('<span>' + result.titleNoFormatting.replace(brps_gas.remove_string_regexp, '') + '</span>').text())
-            ;
-        var $result = $('<li/>').append($a);
-        $result.appendTo($results);
-        });
-      $results.appendTo('#gas-results').hide().animate({height: 'toggle', opacity: 'toggle'}, 'slow');
+    $results = $('<ul/>').appendTo('#gas-results');
+    }
+  else
+    $results = $('#gas-results ul');
+
+  if (results.length > 0) {
+    $.each(results, function(idx, result) {
+      // Do not list same page
+      if (result.unescapedUrl == document.location.href)
+        return;
+      // Check if the result link is exclude
+      if (brps_gas.exclude_url_regexp && brps_gas.exclude_url_regexp.test(result.unescapedUrl))
+        return;
+      var $a = $('<a/>')
+          .attr('href', result.unescapedUrl)
+          .text($('<span>' + result.titleNoFormatting.replace(brps_gas.remove_string_regexp, '') + '</span>').text())
+          ;
+      var $result = $('<li/>').append($a);
+      $result.appendTo($results).hide().animate({height: 'toggle', opacity: 'toggle'}, 'slow');
+      // Check if reach limit
+      if ($results.find('li').length >= brps_gas.limit)
+        return false;
+      });
+    }
+
+  if ($results.find('li').length < brps_gas.limit) {
+    // Get more results
+    if (cursor.currentPageIndex < MAX_PAGES - 1) {
+      $.getJSON(base_url + '&start=' + ((cursor.currentPageIndex + 1) * RESULTS_PER_PAGE).toString(), function(data){brps_gas_callback(data, base_url)});
       }
-    else
-      $('#gas-results').append($(brps_gas.html_no_results));
-    });
-  });  
+    else {
+      if ($results.find('li').length == 0) {
+        $('#gas-results').append($(brps_gas.html_no_results));
+        }
+      }
+    }
+  }
 // vim: set sw=2 ts=2 et:
