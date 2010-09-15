@@ -129,7 +129,7 @@ function brps_gas_callback(data, base_url) {
 
   if ($results.find('li').length < brps_gas.limit) {
     // Get more results
-    if (cursor.currentPageIndex < MAX_PAGES - 1) {
+    if (cursor.currentPageIndex < MAX_PAGES - 1 && (cursor.currentPageIndex + 1) * RESULTS_PER_PAGE < cursor.estimatedResultCount) {
       $.getJSON(base_url + '&start=' + ((cursor.currentPageIndex + 1) * RESULTS_PER_PAGE).toString(), function(data){brps_gas_callback(data, base_url)});
       }
     else {
