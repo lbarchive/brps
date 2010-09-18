@@ -48,6 +48,9 @@ $(function() {
 
   $.each(tags, function(idx, tag) {
     var tag = $(tag).text().toLowerCase();
+    // Quote tag if it contains spaces
+    if (tag.indexOf(' ') > -1)
+      tag = '"' + tag + '"';
     tag_count[tag] = ((tag in tag_count) ? tag_count[tag] : 0 ) + 1;
     });
   tags = [];
@@ -83,7 +86,7 @@ $(function() {
     });
 
   // Composing the query string
-  var q = '(' + tags.join(' | ') + ') ' + sites.join(' | ');
+  var q = tags.join(' | ') + ' ' + sites.join(' | ');
 
   $('#gas-results').empty().append($(brps_gas.html_loading));
 
