@@ -55,8 +55,5 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
   login: admin
 
-- url: /getkey
-  script: getkey.py
-
 - url: /.*
   script: index.py

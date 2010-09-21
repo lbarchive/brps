@@ -51,6 +51,20 @@ class HomePage(webapp.RequestHandler):
     pass
 
 
+class InstallPage(webapp.RequestHandler):
+  
+  def get(self):
+    
+    template_values = {
+      'config': config,
+      }
+    path = os.path.join(os.path.dirname(__file__), 'template/install.html')
+    self.response.out.write(template.render(path, template_values))
+
+  def head(self):
+    pass
+
+
 class DonatePage(webapp.RequestHandler):
   
   def get(self):
@@ -240,6 +254,7 @@ is encountering a small problem... will retry in a few seconds...', callback)
 
 application = webapp.WSGIApplication([
     ('/', HomePage),
+    ('/install', InstallPage),
     ('/donate', DonatePage),
     ('/stats/?', StatsPage),
     ('/get', GetPage),
