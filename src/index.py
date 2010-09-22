@@ -51,6 +51,15 @@ class HomePage(webapp.RequestHandler):
     pass
 
 
+class GetKeyPage(webapp.RequestHandler):
+  
+  def get(self):
+
+    self.redirect('/install')
+
+  def head(self):
+    pass
+
 class InstallPage(webapp.RequestHandler):
   
   def get(self):
@@ -254,6 +263,7 @@ is encountering a small problem... will retry in a few seconds...', callback)
 
 application = webapp.WSGIApplication([
     ('/', HomePage),
+    ('/getkey', GetKeyPage),
     ('/install', InstallPage),
     ('/donate', DonatePage),
     ('/stats/?', StatsPage),
