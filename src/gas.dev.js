@@ -130,6 +130,27 @@ function brps_gas_callback(data, base_url) {
       });
     }
 
+  function track() {
+    function _track() {
+      try {
+        var pageTracker = _gat._getTracker("UA-8340561-4");
+        pageTracker._setDomainName("none");
+        pageTracker._setAllowLinker(true);
+        pageTracker._trackPageview();
+        }
+      catch(err) {
+        }
+      }
+    if (window._gat) {
+      _track();
+      }
+    else {
+      $.getScript(('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js', function(){
+          _track();
+          });
+      }
+    }
+
   if ($results.find('li').length < brps_gas.limit) {
     // Get more results
     if (cursor.currentPageIndex < MAX_PAGES - 1 && (cursor.currentPageIndex + 1) * RESULTS_PER_PAGE < cursor.estimatedResultCount) {
@@ -139,7 +160,12 @@ function brps_gas_callback(data, base_url) {
       if ($results.find('li').length == 0) {
         $('#gas-results').append($(brps_gas.html_no_results));
         }
+      // Finish getting related posts, track it.
+      track();
       }
+    }
+  else {
+    track();
     }
   }
 // vim: set sw=2 ts=2 et:
