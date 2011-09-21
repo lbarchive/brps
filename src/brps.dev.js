@@ -1,6 +1,6 @@
 // Blogger.com Related Posts Service (http://brps.appspot.com/)
 //
-// Copyright (C) 2008, 2009  Yu-Jie Lin
+// Copyright (C) 2008, 2009, 2011  Yu-Jie Lin
 //  
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,9 +16,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-google.load('jquery', '1.3');
+google.load('jquery', '1');
 google.setOnLoadCallback(function() {
-  BRPS_get();
+  var $ = jQuery;
+  var _brps_options = window.brps_options || {};
+  if (_brps_options.autoload)
+    BRPS_get();
+  else {
+    $('#related_posts').empty();
+    BRPS_render_widget_title();
+    $('#related_posts').append(
+        $('<button/>')
+            .text(_brps_options.load_button_text || 'Click to load related posts list')
+            .click(BRPS_get)
+        );
+    }
   });
 
 function BRPS_watchdog() {
@@ -102,7 +114,11 @@ function BRPS_get() {
               src = (_brps_options && _brps_options.append_src) ? '?src=brps' : '';
               $('<ul></ul>').appendTo('#related_posts');
               $.each(data.entry, function(i, entry){
-                $('<li><a hr' + 'ef="' + entry.link + src + '" title="Score: ' + entry.score.toString() + '">' + entry.title + '</a></li>').appendTo('#related_posts ul');
+                $('<li><a hr' + 'ef="' + entry.link + src + '" title="Score: ' + entry.score.toString() + '">' + entry.title + '</a></li>')
+                    .appendTo('#related_posts ul')
+                    .hide()
+                    .animate({height: 'toggle', opacity: 'toggle'}, 'slow')
+                    ;
                 });
               }
             else {
